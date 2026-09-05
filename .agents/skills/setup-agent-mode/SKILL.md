@@ -1,11 +1,11 @@
 ---
 name: setup-agent-mode
-description: Configure host-local Agent mode models, reasoning efforts, and panel sizes. Detects the current agent host and writes its local routing file. Use for /setup-agent-mode, "configure agent mode models", or changing the workflow's cost profile.
+description: "Configure every host-local Agent mode delegation choice: whether delegation is enabled, task and concurrency limits, nesting depth, and each role's exact worker roster, model, and reasoning effort. Use for /setup-agent-mode, configure agent mode, or changing its execution profile."
 ---
 
 # Setup Agent mode
 
-Install the shared Agent mode files in the current repository, then write `.agents/agent-mode/models.<host>.local.yaml` for the current coding-agent host. The model file stays local to this machine and overrides inherited-model defaults without coupling other hosts to its model identifiers.
+Install the shared Agent mode files in the current repository, then write `.agents/agent-mode/models.<host>.local.yaml` for the current coding-agent host. This local profile is the only persistent source of delegation limits, worker counts, models, reasoning efforts, and inheritance choices. [`assets/agent-mode/ROUTING.md`](assets/agent-mode/ROUTING.md) defines only the stable role names and their work semantics; it contains no execution defaults.
 
 ## Steps
 
@@ -15,13 +15,13 @@ Read [`assets/agent-mode/HOST-COMPATIBILITY.md`](assets/agent-mode/HOST-COMPATIB
 
 Ensure that the repository ignores `.agents/agent-mode/models.*.local.yaml`. Do not change unrelated ignore rules.
 
-Complete this step when `.agents/agent-mode/HOST-COMPATIBILITY.md` and both files under `.agents/agent-mode/agents` match the packaged assets.
+Complete this step when `.agents/agent-mode/HOST-COMPATIBILITY.md`, `.agents/agent-mode/ROUTING.md`, and both files under `.agents/agent-mode/agents` match the packaged assets.
 
 ### 2. Detect the host and available models
 
-Resolve the host through the reference above. If the runtime does not identify itself, ask the user to select the host before writing a host-specific file. Enumerate models and reasoning efforts the host can actually assign to a subagent. Prefer the host's live model catalog or delegation-tool schema over documentation or memory. If model detection is unavailable, configure only `inherit-parent`. Never write an identifier that the current host has not confirmed.
+Resolve the host through the reference above. If the runtime does not identify itself, ask the user to select the host before writing a host-specific file. Enumerate models and reasoning efforts the host can actually assign to a subagent. Prefer the host's live model catalog or delegation-tool schema over documentation or memory. If model detection is unavailable, the only eligible worker assignment to propose is `inherit-parent`, and the user must still confirm it. Never write an identifier that the current host has not confirmed.
 
-Record which controls the host exposes. These may include model, reasoning effort, worker count, and a per-agent token budget. Do not promise a hard token limit when the host only exposes model and reasoning controls.
+Record which controls the host exposes. These may include model, reasoning effort, concurrency, and a per-agent token budget. Do not promise a control the host cannot enforce. Account count is not a routing field unless the host exposes account selection directly.
 
 ### 3. Learn the user's routing goal
 
@@ -32,68 +32,71 @@ Cover these decisions:
 - what to optimize for, such as strongest results, balanced quality and cost, lowest practical cost, lowest latency, or a custom split by role;
 - the token or spend budget and its unit, such as per top-level run, per delegated worker, or per day, when the user has a real limit;
 - whether every host-confirmed model and reasoning effort is eligible, or the profile must use a restricted set;
-- acceptable comparison-panel fan-out, because worker count often changes cost more than a single model choice;
-- any roles that should deliberately inherit the parent because their work must match the parent or because the parent changes often.
+- whether delegation is enabled at all;
+- the maximum total number of subagent starts in one top-level task, including every nested workflow;
+- the maximum number of concurrently active subagents in that task;
+- the maximum delegation depth, where `1` allows only root-owned starts and `unlimited` leaves depth unrestricted;
+- for every role in `ROUTING.md`, whether the coordinator performs the work or delegates it;
+- for every delegated role, the exact ordered worker roster and each worker's model, reasoning effort, and host-supported budget controls;
+- any roster entries that should deliberately inherit the parent because the user wants them to follow the parent selection.
 
 If the user does not know what to choose, recommend a concrete profile from the live host catalog. Explain the main quality, latency, and cost tradeoff in plain language, then ask for confirmation. Do not make the user translate model names into a routing strategy.
 
-`inherit-parent` is not the default answer when the host exposes explicit model routing. Use it only when the user chooses inheritance for a role, the parent is intentionally the best fit, or live capability detection cannot validate an explicit assignment.
+Recommendations are proposals, not defaults. Do not write numeric limits, roster lengths, models, reasoning efforts, inheritance, or coordinator execution until the user confirms them. `inherit-parent` is valid only when the user explicitly selects it for that roster entry.
 
 ### 4. Load current state
 
-Load `.agents/agent-mode/models.<host>.local.yaml` when it exists. Treat it as the current profile to review, not proof that its tradeoffs still match the user's goal. On first setup, start from the user's confirmed goal and the live model catalog. Use one worker for single-worker roles and the confirmed panel fan-out for comparison roles.
+Load `.agents/agent-mode/models.<host>.local.yaml` when it exists. Treat a version 2 profile as the current proposal to review, not proof that its tradeoffs still match the user's goal. Treat every earlier version as unconfigured: it may inform a proposal, but every limit and route must be reconfirmed before writing version 2. Until then, Agent mode starts no workers.
 
 ### 5. Recommend, map, and confirm
 
-Propose explicit assignments supported by the active host. Match stronger reasoning to ambiguous, cross-cutting, algorithmic, and judgment-heavy roles. Match cheaper or faster models to narrow exploration, mechanical checks, and high-fan-out panels. Keep the recommendation inside the confirmed model set and budget. If the requested budget cannot support the requested quality or fan-out, say so and offer the smallest useful adjustment.
+Propose explicit assignments supported by the active host. Match stronger reasoning to ambiguous, cross-cutting, algorithmic, and judgment-heavy roles. Match cheaper or faster models to narrow exploration and mechanical checks. Keep the recommendation inside the confirmed model set and budget. If the requested budget cannot support the requested quality or roster sizes, say so and offer the smallest useful adjustment.
 
-Show every role with its model, reasoning effort, worker count, and a short reason for any non-obvious assignment. Mark stale identifiers. Ask the user to confirm or revise the proposed map before writing it. The panel length sets fan-out for `how-critics`, `arena-runners`, `architect-runners`, and `interrogate-reviewers`. `arena-cross-judge` is one worker chosen from its list, preferably from a different model family. `swarm-worker` is reused for each worker unless a race assigns models per arm.
+Show delegation mode, every delegation limit, and every role from `ROUTING.md`. For coordinator routes, show `coordinator`. For worker routes, show the exact roster length and every model/reasoning assignment. Explain non-obvious choices and mark stale identifiers. Ask the user to confirm or revise the complete profile before writing. Do not infer a special roster size, model family, or reasoning level from a role name.
 
 ### 6. Validate
 
-The file's top-level `host` must equal the resolved host slug. Every explicit model and reasoning effort must be supported by the current host. `inherit-parent` always passes. Reject unavailable combinations before writing.
+The file's top-level `host` must equal the resolved host slug. Every explicit model and reasoning effort must be supported by the current host. An explicitly selected `inherit-parent` entry passes structural validation. Reject unavailable combinations before writing. From the repository root, run `python3 .agents/skills/setup-agent-mode/scripts/validate-profile.py <profile-path> .agents/agent-mode/ROUTING.md`. Then run `python3 .agents/skills/setup-agent-mode/scripts/audit-routing.py`. Structural validation checks the version 2 contract; live host validation remains the authority for model identifiers and reasoning efforts.
 
 ### 7. Write the rule
 
 Overwrite `.agents/agent-mode/models.<host>.local.yaml` so reruns stay idempotent. Use this shape:
 
 ```yaml
-version: 1
+version: 2
 host: <resolved-host-slug>
+intent:
+  optimization: <confirmed-routing-goal>
+  budget: <confirmed-limit-with-unit-or-none>
+delegation:
+  mode: enabled
+  max-workers-per-task: <confirmed-positive-integer-or-unlimited>
+  max-concurrent-workers: <confirmed-positive-integer-or-host-limit>
+  max-delegation-depth: <confirmed-positive-integer-or-unlimited>
 roles:
   feature:
-    - model: <confirmed-model-id>
-      reasoning: <confirmed-reasoning-effort>
+    execution: coordinator
   how-explorer:
-    - model: <confirmed-model-id>
-      reasoning: <confirmed-reasoning-effort>
+    execution: workers
+    workers:
+      - model: <confirmed-model-id>
+        reasoning: <confirmed-reasoning-effort>
   how-critics:
-    - model: <confirmed-model-id>
-      reasoning: <confirmed-reasoning-effort>
-    - model: <confirmed-model-id>
-      reasoning: <confirmed-reasoning-effort>
+    execution: workers
+    workers:
+      - inherit-parent: true
   arena-runners:
-    - model: <confirmed-model-id>
-      reasoning: <confirmed-reasoning-effort>
-    - model: <confirmed-model-id>
-      reasoning: <confirmed-reasoning-effort>
-  arena-cross-judge:
-    - model: <confirmed-model-id>
-      reasoning: <confirmed-reasoning-effort>
-  interrogate-reviewers:
-    - model: <confirmed-model-id>
-      reasoning: <confirmed-reasoning-effort>
-    - model: <confirmed-model-id>
-      reasoning: <confirmed-reasoning-effort>
+    execution: workers
+    workers:
+      - model: <confirmed-model-id>
+        reasoning: <confirmed-reasoning-effort>
 ```
 
-The angle-bracketed values describe the schema. Replace them with validated host values. Use `inherit-parent` only for an intentionally inherited role or a required fallback.
-
-Include every supported role in the real file: `feature`, `refactoring`, `bug-fix`, `perf-issue`, `hillclimb`, `judgment-prose`, `hardest-tasks`, `how-explorer`, `how-explainer`, `how-critics`, `why-investigators`, `why-synthesizer`, `reflect-tooling`, `reflect-judgment`, `arena-runners`, `arena-cross-judge`, `swarm-worker`, `architect-runners`, and `interrogate-reviewers`.
+The angle-bracketed values describe the schema. Replace them with user-confirmed, host-validated values. Quote intent strings when YAML could interpret them as another type. Include every role listed in `ROUTING.md` when delegation is enabled. A `coordinator` route has no `workers`. A `workers` route has a non-empty roster, and that list is the complete configured capacity for one invocation of the role. To disable all delegation, keep `intent`, write only `mode: disabled` inside `delegation`, and omit `roles` and all limits. Do not maintain another role list here.
 
 ### 8. Confirm
 
-Show the host, optimization goal, budget or cost posture, eligible model set, file path, panel fan-out, explicit models, intentionally inherited roles, and any unavailable combinations rejected during setup. Re-running this skill updates only the current host's file.
+Show the host, delegation mode, optimization goal, budget or cost posture, total task worker limit, concurrency limit, delegation depth, file path, coordinator roles, explicit worker rosters, intentionally inherited entries, and any unavailable combinations rejected during setup. Re-running this skill updates only the current host's file.
 
 ### 9. Offer a verification skill (optional)
 

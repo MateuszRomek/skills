@@ -1,6 +1,6 @@
 ---
 name: reflect
-description: Spawn three parallel review subagents over the active transcript, surface learnings, and route each to a concrete edit on an existing skill. Use when the user says reflect.
+description: Dispatch configured transcript-review roles, surface durable learnings, and route each accepted finding to a concrete skill edit. Use when the user says reflect.
 disable-model-invocation: true
 ---
 
@@ -34,21 +34,21 @@ When the host supplies JSONL transcripts, account for flat, nested, and subagent
 
 For each candidate, read the first JSONL line and check that `message.content[0].text` contains the conversation's opening user prompt. Take the matching path. If no path resolves, write a tight digest of the session and pass that instead.
 
-### 2. Spawn three reviewers in parallel
+### 2. Dispatch the review lenses
 
-Launch three reviewers together through the host's native delegation capability. Use the active profile for role overrides. Reviewers may need MCP access for cited context, so give them the least-permissive sandbox that preserves those tools. Their prompts forbid file writes; the parent applies edits.
+Dispatch each semantic lens through its role below. Each role receives its shared template; setup alone owns the roster, models, reasoning efforts, and limits. Review workers may need MCP access for cited context, so give them the least-permissive sandbox that preserves those tools. Their prompts forbid file writes; the coordinator applies edits.
 
-| Lens | `model` | Prompt template |
+| Lens | Role | Prompt template |
 |---|---|---|
-| Judgment | `reflect-judgment`, otherwise inherit parent | `references/judgment-reviewer.md` |
-| Tooling | `reflect-tooling`, otherwise inherit parent | `references/tooling-reviewer.md` |
-| Divergent | `reflect-judgment`, otherwise inherit parent | `references/divergent-reviewer.md` |
+| Judgment | `reflect-judgment` | `references/judgment-reviewer.md` |
+| Tooling | `reflect-tooling` | `references/tooling-reviewer.md` |
+| Divergent | `reflect-divergent` | `references/divergent-reviewer.md` |
 
 Pass each template verbatim, substituting the transcript path or digest where marked. Reviewers return findings to the parent task.
 
 ### 3. Synthesize
 
-Spawn one synthesizer using `reflect-judgment` when configured; otherwise inherit the parent. Preserve MCP access when citation checks need it. Use `references/synthesizer.md` verbatim, with each reviewer's full output inlined where marked. The synthesizer returns a structured Accepted / Rejected / Backlog list.
+Dispatch the shared synthesis brief as `reflect-synthesizer`. Preserve MCP access when citation checks need it. Use `references/synthesizer.md` verbatim, with every returned review inlined where marked. The coordinator reconciles returned syntheses into a structured Accepted / Rejected / Backlog list.
 
 ### 4. Structural enforcement check
 

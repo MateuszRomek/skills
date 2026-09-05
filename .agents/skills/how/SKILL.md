@@ -11,7 +11,7 @@ Explore the codebase to answer "how does X work?" questions. Produce clear archi
 Two modes:
 
 1. **Explain** (default). Explore the codebase and produce a clear explanation
-2. **Critique.** Explain first, then spawn multiple models to independently identify architectural issues
+2. **Critique.** Explain first, then dispatch the configured independent architectural review roster
 
 ## Explain Mode
 
@@ -26,26 +26,13 @@ Parse what the user is asking about:
 
 Identify the scope. If ambiguous, state your best-guess interpretation before exploring. Don't ask. Let the user redirect if you're off.
 
-**Assess complexity to decide the approach:**
-
-- **Simple** (a single module, a small utility, a narrow question like "how does function X work"): skip explorer agents; the explainer explores and explains in a single pass. Go to Step 2b.
-- **Complex** (a subsystem spanning multiple files/services, a cross-cutting feature, a full architectural overview): spawn parallel explorer agents first, then hand off to the explainer. Go to Step 2a.
-
-When in doubt, lean simple. You can always spawn explorers if the explainer hits a wall.
-
-Before either path delegates, resolve its execution plan through [`HOST-COMPATIBILITY.md`](../../agent-mode/HOST-COMPATIBILITY.md).
-
-### Step 2a. Explore (complex questions only)
-
-Decompose the question into 2-4 parallel exploration angles, each a distinct slice of the subsystem so explorers don't duplicate work. Example split for "how does the rate limiter work?":
+Resolve execution through [`HOST-COMPATIBILITY.md`](../../agent-mode/HOST-COMPATIBILITY.md). Decompose the question into the distinct exploration angles needed to trace the subsystem without duplicating work. The number of semantic angles follows the code shape; it never determines the worker roster. Example split for "how does the rate limiter work?":
 
 - Explorer 1: data model and state management
 - Explorer 2: request path and enforcement
 - Explorer 3: configuration and metrics infrastructure
 
-The right decomposition depends on the question. Use your judgment. Narrow questions: 2 explorers is fine. Broad subsystems: up to 4.
-
-Spawn all explorers together through the host's native delegation capability. Use `how-explorer` from the active profile when present; otherwise inherit the parent. Keep each explorer read-only.
+Dispatch those units as `how-explorer`. Its `partition` semantics distribute the units across no more than the setup-owned roster. Keep delegated workers read-only and pass any descendant budget reserved for their branch.
 
 Each explorer gets the same base prompt from `references/explorer-prompt.md` plus a specific exploration angle naming its slice. Each explorer should:
 - Start broad: Glob for relevant directories, Grep for key types/interfaces/class names
@@ -56,21 +43,9 @@ Each explorer gets the same base prompt from `references/explorer-prompt.md` plu
 
 Each explorer returns structured findings: components found, flow traced, files read, anything non-obvious. Overlap between explorers is fine; the explainer reconciles.
 
-Then proceed to Step 3.
+### Step 3. Explain and synthesize
 
-### Step 2b. Direct Explain (simple questions)
-
-Spawn one read-only subagent that explores and explains in one pass. Use `how-explainer` from the active profile when present; otherwise inherit the parent.
-
-The agent does its own exploration (Glob, Grep, Read) and writes the explanation directly. Read `references/explainer-prompt.md` for the communication style and output format. Same structure, just no explorer findings as input.
-
-Proceed to Step 4.
-
-### Step 3. Synthesize (complex questions only)
-
-Once all explorers return, spawn one read-only subagent to synthesize their findings into one coherent explanation. Use `how-explainer` from the active profile when present; otherwise inherit the parent.
-
-The explainer gets all explorers' findings and writes the human-facing explanation (output format below). Read `references/explainer-prompt.md` for the full prompt template. The explainer reconciles overlapping findings, resolves contradictions, and weaves the slices into a unified picture.
+After exploration, dispatch one shared explanation brief as `how-explainer`. Include all findings and use `references/explainer-prompt.md`. Each resolved worker reconciles overlaps and contradictions into the output format below. The coordinator owns the final explanation and reconciles multiple returned drafts when the configured roster contains them. If the profile keeps this role in the coordinator, the coordinator performs the same contract directly.
 
 ### Step 4. Present
 
@@ -98,11 +73,9 @@ Triggered when the user asks for architectural issues, problems, or improvements
 
 Run the full explain flow above (Steps 1-4). You must understand the architecture before critiquing it.
 
-### Step 2. Spawn Critics
+### Step 2. Dispatch Critics
 
-After the explanation is complete, spawn one architectural critic per `how-critics` entry in the active profile. Without configuration, spawn two independent inherited-model critics. Launch them together.
-
-Keep every critic read-only. Treat configured reasoning efforts as minimums and escalate only when the architecture warrants deeper analysis.
+After the explanation is complete, dispatch one shared critique brief as `how-critics`. Its configured roster is complete: do not resize it, replace assignments, inherit, or escalate reasoning. Keep every resolved worker read-only.
 
 Read `references/critic-prompt.md` for the prompt template. Each critic gets:
 1. The explanation from Step 1 (so they don't re-explore)

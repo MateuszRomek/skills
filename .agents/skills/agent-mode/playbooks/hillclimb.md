@@ -1,6 +1,6 @@
 ### Hillclimb
 
-**You own the metric and the experiment's integrity. Supervise and review; delegate the attempts.** For sustained, iterative improvement of one measurable thing against a target ("hillclimb on X", "make startup 50% faster", "systematically drive down <metric>", "keep trying until <metric> improves by N%"). A one-off fix is Bug fix or Perf issue; this is the loop.
+**You own the metric and the experiment's integrity. Supervise and review every attempt.** For sustained, iterative improvement of one measurable thing against a target ("hillclimb on X", "make startup 50% faster", "systematically drive down <metric>", "keep trying until <metric> improves by N%"). A one-off fix is Bug fix or Perf issue; this is the loop.
 
 Core discipline: one change, one measurement, keep or revert. Never stack untested changes, and never claim a win from code inspection. The data decides (the **prove-it-works** principle skill).
 
@@ -9,7 +9,7 @@ Core discipline: one change, one measurement, keep or revert. Never stack untest
 3. Open the decision log via the **show-me-your-work** skill. A `decision.tsv`, one row per attempt: id, hypothesis, change, before, after, delta, tests, verdict (kept or reverted), note. This is the run's memory. Read it before each attempt so the search accumulates instead of circling. Keep it out of the tree (gitignored) so it survives reverts.
 4. Ground each hypothesis in the architecture model from step 1, so it names a specific mechanism ("defer X off the boot path because it blocks first paint"), not "try memoizing something".
 5. Loop, one hypothesis per iteration:
-   - Hand the change to a subagent using the configured `hillclimb` role, or inherited parent settings when absent. Give it a tight scope; supervise and review the diff rather than typing it (the **guard-the-context-window** principle skill). When several independent hypotheses are live, fan them to parallel subagents, each in its own worktree so they can't collide (the **separate-before-serializing-shared-state** principle skill).
+   - Turn live hypotheses into bounded semantic units and dispatch them as `hillclimb` through [`HOST-COMPATIBILITY.md`](../../../agent-mode/HOST-COMPATIBILITY.md). Setup decides execution and roster size. Give each writing worker an isolated worktree, then supervise and review every diff (**guard-the-context-window**, **separate-before-serializing-shared-state**).
    - Measure before and after with the frozen harness, and run the regression gate.
    - Accept only when the metric moves past noise and the gate stays green. Otherwise revert the change in full; a tweak that "might help" does not ride along.
    - Keep each accepted fix as a separate verified unit. Commit only when the user explicitly asks. Log the row either way, kept or reverted.

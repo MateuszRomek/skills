@@ -30,7 +30,7 @@ Update mode changes the rest of the flow:
 
 Use the host's task or conversation APIs when available. Otherwise use only the workspace-scoped transcript location supplied by the host. Never scan unrelated projects. If no history interface exists, use the visible conversation and state the smaller evidence window.
 
-Survey recent agent conversations within that scope for recurring patterns. Run multiple parallel subagents across slices of history (e.g. last 2-4 weeks, split into 3 slices so each has enough material). Each slice mining subagent reads transcripts from the workspace-scoped path the parent provides, looks for the signals below, and returns a short structured list of patterns it saw with evidence pointers. Default signals worth hunting:
+Survey recent agent conversations within that scope for recurring patterns. Divide the requested time window into coherent semantic slices and dispatch them as `bulk-reader` through the active profile. The `partition` route maps those slices onto the user-configured roster and both task limits. Each read-only leaf reads only the workspace-scoped transcripts its unit names and returns a short structured list of patterns with evidence pointers. Default signals worth hunting:
 
 - Response preferences (length, tone, format, "dumb it down" corrections)
 - Delegation habits (subagents, models, specialized workflows, parallelism)

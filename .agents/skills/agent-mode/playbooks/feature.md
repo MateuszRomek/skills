@@ -1,6 +1,6 @@
 ### Feature
 
-**You own the design. Plan, review, verify.** Delegate implementation; stay in the lead.
+**You own the design. Plan, review, verify.** Route implementation through the configured `feature` role and stay in the lead.
 
 1. `how` over the affected subsystem.
 2. `architect` for parallel design exploration. Skipping stays as `architect skipped: <reason>`; do not fold the design decision silently into implementation.
@@ -8,14 +8,14 @@
    - **Blocking first steps.** Gates run before fan-out.
    - **Independent workstreams.** Disjoint files, services, or layers parallelize. Shared writes serialize.
    - **Shared mutable state.** Default to splitting the target (the **separate-before-serializing-shared-state** principle skill). Serialize only for real invariants.
-   - **Smallest safe decomposition.** If one worker is best, name why.
-4. Delegate code-writing to a subagent using the configured `feature` role, or inherited parent settings when absent. Give it a specific scope (file paths, named data shape and its organizing structure per **principle-model-the-domain** — a state machine over scattered booleans, a table/registry over branching, a typed model over repeated shape assumptions, chosen before the delegate writes logic — and success criteria); review its diff yourself. When the implementation admits multiple valid shapes (error handling, abstraction layer, test structure), delegate via the **arena** skill instead so the runners surface the alternatives and the cross-judge guards the pick. Mandatory: no skip-with-reason escape, and Laziness Protocol does not override it (the gain is review separation, not lines saved). You can spawn a subagent even though you are one; "the app is small" and "a subagent cannot spawn one" are both wrong. A subagent forbidden to spawn satisfies this by owning the diff directly with the same review separation; no "standing by" reply that waits on a nested agent. Comments per **Comments**. Surgical edits, re-ground against the source for upstream-derived files. Port shared-primitive improvements to all consumers and verify each.
+   - **Smallest safe decomposition.** Name the smallest independently verifiable semantic units; do not translate them into a worker count.
+4. Turn implementation slices into semantic work units and dispatch them as `feature` through [`HOST-COMPATIBILITY.md`](../../../agent-mode/HOST-COMPATIBILITY.md). Give each unit file paths, the named data shape and organizing structure from **principle-model-the-domain**, and success criteria. The profile decides whether the coordinator or workers execute them. Review every returned diff. When implementation admits genuinely competing shapes, use **arena**; its own configured routes control the comparison. Comments per **Comments**. For upstream-derived files, re-ground against the source. Port shared-primitive improvements to every consumer and verify each.
 5. Verify on the matching surface. "Inconclusive" or wrong-surface is not a pass; flag it.
 6. Build and verify small ordered units. Preserve that order in commits only when the user explicitly asks for them.
    Use the **sequence-verifiable-units** principle skill, verifying each small unit before the next.
 7. If the design is contested, `interrogate` before implementation.
 8. Finish with verified local changes. Leave publication to the user's explicit delivery request.
 
-Code-coupled work (one feature, one migration) goes to a single owner with the checkpoint inline; that owner fans out internally after the blocking phase. Parent-level fan-out is for slices that produce independent artifacts (audits, cross-subsystem investigations, competing experiments). Rewrite the checkpoint at phase boundaries; spawn a fresh owner rather than chaining interrupts.
+Code-coupled work stays one semantic unit unless it produces independently verifiable artifacts. Independent artifacts become separate units after blocking prerequisites finish. Worker count never follows from this decomposition; setup owns it. Rewrite the checkpoint at phase boundaries.
 
 **Reply:** what you built, what you chose and why, open decisions. Tables for design alternatives.

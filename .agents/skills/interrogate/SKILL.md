@@ -6,7 +6,7 @@ disable-model-invocation: true
 
 # Interrogate
 
-Spawn one reviewer per configured model to adversarially review code changes. Each model gets the same prompt and rubric. The adversarial signal comes from model diversity, not assigned personas. Models differ in blind spots, priors, and reasoning patterns. Agreement across models is high-confidence signal; lone-model findings are worth reading but lower confidence.
+Dispatch the same adversarial review brief to the setup-owned `interrogate-reviewers` roster. The signal comes from independent readings, while setup alone decides roster size, models, and reasoning efforts. Agreement is high-confidence signal; isolated findings are worth reading but lower confidence.
 
 The deliverable is a synthesized verdict. Do NOT auto-apply changes.
 
@@ -22,7 +22,7 @@ Package the diff (or file contents) plus any surrounding context files the revie
 
 ## Step 2, State the Intent
 
-Before spawning reviewers, state the intent explicitly. What is this code trying to accomplish? Derive this from:
+Before dispatching reviewers, state the intent explicitly. What is this code trying to accomplish? Derive this from:
 
 - The user's message
 - Commit messages
@@ -31,11 +31,11 @@ Before spawning reviewers, state the intent explicitly. What is this code trying
 
 Write one clear paragraph. Reviewers challenge whether the work achieves the intent well, not whether the intent itself is correct. If you're unsure about the intent, ask the user before proceeding.
 
-## Step 3, Spawn Reviewers
+## Step 3, Dispatch Reviewers
 
-Resolve the execution plan through [`HOST-COMPATIBILITY.md`](../../agent-mode/HOST-COMPATIBILITY.md), then launch all reviewers together through the host's native delegation capability. Use one reviewer per `interrogate-reviewers` entry in the active profile. Without configuration, spawn two independent read-only reviewers that inherit the parent model and reasoning effort. Extend or shrink Reviewer A/B/C labels to the actual count.
+Resolve and dispatch `interrogate-reviewers` through [`HOST-COMPATIBILITY.md`](../../agent-mode/HOST-COMPATIBILITY.md). Send the same filled template to the complete configured roster. The current coordinator schedules starts within its depth and reserved task budget. Workers remain read-only. Generate neutral reviewer labels from the resolved roster without assuming a count, and pass any descendant budget reserved for each branch.
 
-If the host rejects a configured model or reasoning effort, inherit the parent for that reviewer, continue the review, and report the stale entry. Do not guess a replacement identifier or mutate delivery state while repairing configuration.
+If the host rejects a configured assignment, stop the route, follow its coordinator behavior, and report the stale entry. Do not inherit or guess a replacement.
 
 Read `references/reviewer-prompt.md` and fill in the template with:
 1. The stated intent

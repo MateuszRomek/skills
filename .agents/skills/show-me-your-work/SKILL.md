@@ -66,14 +66,14 @@ Fix the log, not the story. If the work diverged from what a row claims, the row
 
 ## Cross-model review of the trail
 
-Before handing back, spawn a subagent on a different model family when the host and model routing provide one. Otherwise use an independent inherited-model subagent and disclose that the review was same-family. The subagent reads the audit trail and available task history, then flags what the user should pay attention to. This is a scan for weak evidence and risk, not a redo.
+Before handing back, dispatch the audit-trail review brief as `reviewer` through the active profile. Every resolved worker reads the trail and available task history, then flags what the user should scrutinize. Setup owns independence, roster size, models, and reasoning; this skill adds no fallback. This is a scan for weak evidence and risk, not a redo.
 
 - Decisions logged with weak or absent evidence.
 - Verification steps skipped or claimed without proof in the transcript.
 - Choices that look risky in hindsight (premature, scope-creeping, papering over a symptom).
 - Gaps the user would otherwise miss on a casual skim.
 
-Every reply for a run that produced a trail ends with an "Attention" section. Lead with the reviewer's model on its own line (`reviewed by <model>`), then list each flag pointing to specific rows or moments. "No flags" is a valid value; the model name is not. The self-audit asks if the log told the truth; this asks what the user should still scrutinize even when it did.
+Every reply for a run that produced a trail ends with an "Attention" section. Identify each returned review by its configured roster label, then list flags pointing to specific rows or moments. "No flags" is valid. If the `reviewer` route is unavailable, say that independent review was unavailable. The self-audit asks if the log told the truth; this asks what the user should still scrutinize even when it did.
 
 ## Reviewing the trail
 

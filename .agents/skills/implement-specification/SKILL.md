@@ -10,7 +10,7 @@ Turn one completed specification into a sequence of small changes that a reviewe
 ## Boundaries
 
 - Start from a settled specification. If a product or architecture decision is still open, return it to **wayfinder** or the user instead of inventing the answer.
-- Treat the current model as the coordinator. Use the user's configured models when present. Otherwise inherit the current model. Never require a named provider or model tier.
+- Treat the current model as the coordinator. Resolve every delegated role through the user's version 2 profile. Never infer inheritance, a provider, or a model tier.
 - Work locally by default. Staging, committing, pushing, opening pull requests, and merging require explicit current authorization.
 - Route pull-request publication through **prepare-pull-request**. Route CI monitoring and merging through **merge-when-ci-passes**. This skill never replaces either workflow.
 
@@ -71,7 +71,7 @@ Do not start a dependent slice on an unverified base. A changed lower slice inva
 
 Parallelize only independent slices with disjoint ownership. Give each writer an isolated worktree or branch when Git authorization covers creating them. Otherwise work sequentially in the current checkout.
 
-Use the coordinator directly for ordinary slices. Add one implementation worker when the slice is large enough to benefit from isolated ownership. Add one independent reviewer for medium-risk slices. Use **interrogate** for high-risk review, **arena** for competing designs, and **swarm** only when broad parallel coverage earns its token cost. The user can override each role through the IDE's current model or model configuration.
+Turn ready implementation slices into semantic units and dispatch them as `feature` through [`HOST-COMPATIBILITY.md`](../../agent-mode/HOST-COMPATIBILITY.md). Dispatch an independent review brief as `reviewer` when the specification requires that evidence. The active profile alone decides whether either role stays with the coordinator or uses workers, and it owns every assignment and limit. Use **interrogate** for adversarial review, **arena** for competing designs, and **swarm** for broad coverage. Only an explicit current-task user instruction overrides the profile.
 
 ## 4. Prepare the review stack
 

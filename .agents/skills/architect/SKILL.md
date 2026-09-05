@@ -28,11 +28,9 @@ Skip Phase A only when the work is genuinely greenfield with no surrounding syst
 
 ## Phase B: Sketch
 
-Run the **arena** skill with the design-sketch task and the Phase A grounding artifacts. Pass `references/runner-prompt.md` as each runner's prompt. Each candidate produces a design package shaped per `references/rationale-template.md`: the caller's usage written first, then the type sketch, function signatures, module map, and prose rationale derived from it.
+Dispatch the shared design-sketch brief as `architect-runners` through [`HOST-COMPATIBILITY.md`](../../agent-mode/HOST-COMPATIBILITY.md). Pass `references/runner-prompt.md` to the complete configured roster. Each candidate produces a design package shaped per `references/rationale-template.md`: the caller's usage written first, then the type sketch, function signatures, module map, and prose rationale derived from it. Setup alone owns roster size and assignments; an unavailable route makes the comparison phase unavailable.
 
-Use `architect-runners` from the active profile resolved through [`HOST-COMPATIBILITY.md`](../../agent-mode/HOST-COMPATIBILITY.md). Otherwise run two independent candidates that inherit the parent model and reasoning effort.
-
-Design it twice. Require at least two structurally distinct candidates before synthesis, even when the first looks sufficient. This is the **exhaust-the-design-space** principle skill made concrete. Whole-shape alternatives, not point fixes inside one shape.
+Use the complete configured `architect-runners` roster and keep every returned design structurally independent. Compare whole-shape alternatives, not point fixes inside one shape. If the configured roster produces no independent comparison, state that limitation instead of silently adding candidates. This is the **exhaust-the-design-space** principle skill constrained by the user's routing choice.
 
 Screen every candidate against [`references/design-red-flags.md`](references/design-red-flags.md) before synthesis. Reject or revise shallow modules, information leakage, temporal decomposition, and pass-through methods.
 

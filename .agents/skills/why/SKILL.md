@@ -61,7 +61,7 @@ If the target is vague ("why do we do it this way?" with no clear referent), mak
 
 ## Step 2. Establish the Code Anchor
 
-Before spawning investigators, anchor the investigation in concrete code. You need:
+Before dispatching investigation work, anchor it in concrete code. You need:
 
 - The relevant file path(s) and line range(s)
 - The key symbols (function names, class names, constants)
@@ -92,7 +92,7 @@ gh pr view <number> --json title,body,author,createdAt,mergedAt,labels,closingIs
 
 Capture this as seed context (file paths, symbols, commits, PR numbers, linked ticket IDs). Pass it to the investigators so they don't rediscover it.
 
-## Step 3. Spawn Parallel Investigators (default posture)
+## Step 3. Dispatch Evidence Searches
 
 **Default to the full parallel investigation.** Each evidence category lives in a different kind of system, and you cannot tell from the question alone which one holds the answer without looking. So look across every available category, in parallel, by default.
 
@@ -114,9 +114,7 @@ Source control is always available through git and `gh`. For the other six, clas
 
 Aim for a complete **coverage map**, not a minimal one. A null result from an issue tracker is evidence the decision was not ticketed, a useful fact in itself. Document the null, don't skip the search.
 
-Launch all matching investigators in a single message so they run concurrently. One investigator per category lets each specialize in one tool's query vocabulary and result shape. Don't ask one agent to cover multiple MCPs.
-
-Use `why-investigators` from the active profile when present; otherwise inherit the parent. Give investigators the least-permissive sandbox that still exposes the required MCP or connector. They remain instructionally read-only even when connector access requires a normal agent sandbox.
+Create one semantic work unit for each available evidence category, with that category's query vocabulary, result shape, and tool ownership. Dispatch the units as `why-investigators` through the active profile. Its `partition` semantics may assign several category units to the same configured worker; never merge the units into an undifferentiated search. Give workers the least-permissive sandbox that still exposes the required MCP or connector. They remain instructionally read-only even when connector access requires a normal sandbox. Pass any descendant budget reserved for their branch.
 
 Each investigator gets:
 1. The base prompt from `references/investigator-prompt.md`
@@ -125,13 +123,13 @@ Each investigator gets:
 4. The code anchor from Step 2 (file paths, symbols, commit hashes, PR numbers, ticket IDs)
 5. The user's original question
 
-### Investigator roster. One per available evidence category
+### Evidence-category units
 
-Spawn one investigator per category that has a matching MCP. Each owns exactly one tool or MCP.
+Create a unit for every category that has a matching MCP. Each unit owns exactly one tool or MCP. Setup, not the number of categories, determines how many workers execute those units.
 
 Each entry lists what the category physically contains and the kind of "why" it uniquely surfaces. Use it to know what to expect back, how to name a gap when a category returns empty, and (only in the rare provably-irrelevant case) to justify a skip. Every category overlaps, but each owns a kind of evidence the others cannot recover.
 
-1. **Source control investigator**. Git history, `gh` for PRs, code comments, tests. Always spawn; the only guaranteed source. Best at surfacing *implementation-time rationale captured during review*. PR descriptions stating the problem, review threads debating alternatives, inline comments encoding non-obvious constraints, test names that encode motivating edge cases, and commit messages linking tickets or incidents. Most trustworthy because it ties directly to the diff that shipped.
+1. **Source control**. Git history, `gh` for PRs, code comments, tests. Always search; the only guaranteed source. Best at surfacing *implementation-time rationale captured during review*. PR descriptions stating the problem, review threads debating alternatives, inline comments encoding non-obvious constraints, test names that encode motivating edge cases, and commit messages linking tickets or incidents. Most trustworthy because it ties directly to the diff that shipped.
 
 2. **Issue / ticket tracker investigator** (e.g. Linear, Jira, GitHub Issues, Plane, Shortcut MCP). Tickets, project docs, status updates, spec attachments. Best at surfacing *the product or business forcing function*. Customer requests ("Acme needs X for their SOC2 audit"), compliance deadlines, parent-initiative framing ("Q3 enterprise readiness"), ticket-level scope changes, and labels that categorize the motivation (`customer:*`, `incident-followup`, `compliance`, `perf-regression`). Strongest when the why is external to engineering.
 
@@ -152,13 +150,13 @@ Only skip with an **explicit, written justification** that goes in the final "So
 - **No MCP is available for that category** in this environment. Flag this as a gap, not a choice. Example: "Real-time team chat skipped. No matching MCP available, so the conversational record was not searchable."
 - **The source is provably irrelevant**, not just "probably irrelevant." A high bar. Example: "Error / exception tracking skipped. Target is a build-time script with no runtime code path." Not "probably not in error tracking, it's a feature not an error."
 
-"It's pure feature code, error tracking won't have anything" is **not** sufficient, and neither is "I doubt long-form docs would have this." Run the search; let the null result speak. The cost of an investigator returning empty is one subagent. The cost of missing a design doc that actually exists is a wrong answer.
+"It's pure feature code, error tracking won't have anything" is **not** sufficient, and neither is "I doubt long-form docs would have this." Run the search; let the null result speak. Missing a design doc that exists is worse than recording an empty search.
 
 If your scope assessment suggests a single-commit trivial target where the PR description already contains the complete answer, you may answer inline **only after** confirming all seven available category searches would be redundant. Say so explicitly. This should be rare.
 
 ## Step 4. Synthesize
 
-Spawn one synthesizer subagent using `why-synthesizer` from the active profile when present; otherwise inherit the parent. Give it the least-permissive sandbox that still lets it spot-check citations through the required MCPs or connectors.
+Dispatch one shared synthesis brief as `why-synthesizer`. Give resolved workers the least-permissive sandbox that still lets them spot-check citations through the required MCPs or connectors. The coordinator reconciles returned syntheses and owns the final answer.
 
 The synthesizer gets:
 1. The investigator findings, including any null results and any categories skipped with justification
@@ -212,12 +210,12 @@ After the Sources Consulted block, if the user's `why` question is a precursor t
 - **Sycophantic agreement**. If the user suggests a reason ("I assume this is for performance?"), treat it as a hypothesis and check the evidence independently, don't just confirm it.
 - **Skipping the gaps section**. An honest accounting of what you couldn't find out is part of the value.
 - **Skipping investigators by anticipation**. Deciding up front that "long-form docs probably don't have this" or "this isn't an error tracking thing" without searching. The default-to-all-seven posture prevents this. A null result is a data point; a skipped search is a blind spot.
-- **Collapsing investigators into one agent**. Each MCP has its own query vocabulary, result shape, and pitfalls; pooling them dilutes specialization and makes coverage harder to reason about. Always one investigator per category.
+- **Collapsing categories into one undifferentiated query**. Each MCP has its own vocabulary, result shape, and pitfalls. Preserve category work units even when the configured roster assigns several units to one worker.
 
 ## Reference Files
 
 - `references/epistemics.md`. Confidence tiers and phrasing guide. The synthesizer must follow it.
-- `references/investigator-prompt.md`. Base prompt template for investigator subagents.
+- `references/investigator-prompt.md`. Base prompt template for evidence-search workers.
 - `references/source-playbook.md`. Index pointing at the category playbooks below.
 - `references/sources/*.md`. One self-contained example playbook per category, plus cross-cutting `incident-postmortem.md`. Give an investigator the single file that matches its category and adapt it to the available MCP.
-- `references/synthesizer-prompt.md`. Prompt template for the synthesizer subagent, including the output format.
+- `references/synthesizer-prompt.md`. Prompt template for synthesis, including the output format.

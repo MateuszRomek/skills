@@ -1,6 +1,6 @@
 # Source playbooks
 
-The why skill spawns one investigator per available evidence category, each reading a single source-specific playbook below. The playbooks are concrete examples for common MCPs; adapt them for a different MCP in the same category.
+The why skill creates one semantic search unit per available evidence category. Each unit reads its source-specific playbook below. The active profile decides how those units map to workers. The playbooks are concrete examples for common MCPs; adapt them for a different MCP in the same category.
 
 | Category | Playbook | Example MCP it documents |
 |---|---|---|

@@ -1,12 +1,12 @@
 ---
 name: swarm
-description: "Fan out N parallel workers, drain them, and return one report. Use for /swarm, 'swarm this', or parallel coverage, races, gauntlets, and exploration."
+description: "Dispatch configured workers over coverage slices or a shared race brief, drain them, and return one report. Use for /swarm, 'swarm this', or parallel coverage, races, gauntlets, and exploration."
 disable-model-invocation: true
 ---
 
 # Swarm
 
-Fan out N parallel workers. They may cover separate slices, race the same brief, or mix both. The parent waits, aggregates, and returns one report.
+Dispatch semantic work through the setup-owned `swarm-worker` route. Workers may cover separate slices or receive a shared race brief. The coordinator waits, aggregates, and returns one report.
 
 ## Start
 
@@ -20,18 +20,17 @@ Open a todolist with one entry per phase before launching anything.
 ## Phase A: Frame
 
 1. State the done predicate and the artifact or report the swarm must return.
-2. Choose the shape. Partition into slices, race N workers on identical briefs, or mix both. For a race or mixed shape, declare `first pass`, `rank all`, or `best-of` before spawning.
-3. Set N from the user or derive it from the shape. N is total workers, not the host concurrency limit.
-4. Pick `swarm-worker` from the active profile resolved through [`HOST-COMPATIBILITY.md`](../../agent-mode/HOST-COMPATIBILITY.md). Otherwise inherit the parent model and reasoning effort. For a model race, name each arm's model up front.
-5. Give each worker its own writable output when it writes. Use a worktree, branch, or `/tmp/swarm-<slug>/worker-<n>/`.
+2. Choose the semantic shape: distinct coverage slices or one shared race brief. For a race, declare `first pass`, `rank all`, or `best-of` before dispatch.
+3. Dispatch `swarm-worker` through [`HOST-COMPATIBILITY.md`](../../agent-mode/HOST-COMPATIBILITY.md). Setup owns its roster, assignments, and limits; the skill never derives them from the shape.
+4. Give each resolved worker its own writable output when it writes. Use a worktree, branch, or distinct `/tmp/swarm-<slug>/worker-<label>/`.
 
 ## Phase B: Fan out
 
-Spawn all N workers together through the host's native delegation capability. Use the current local workspace by default. Use a remote environment only when the user requests it or local execution cannot satisfy the task. If a remote worker needs a non-default branch, pass that branch through the host's supported starting-state mechanism.
+The current coordinator schedules the resolved roster within its configured depth and reserved task budget. Use the current local workspace by default. Use a remote environment only when the user requests it or local execution cannot satisfy the task. Include any descendant budget reserved for each worker.
 
 Every brief stands alone. Include the goal, scope, exact slice or race arm, how to verify, and what to report. Reports use `PASS`, `ISSUES`, or `BLOCKED` with evidence.
 
-If a worker drops out, proceed with N-1 and note it.
+If a worker drops out, continue with the returned results and note it. Do not replace the worker.
 
 ## Phase C: Aggregate
 
