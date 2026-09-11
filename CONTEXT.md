@@ -13,3 +13,7 @@
 - **Coordinator execution.** The route keeps work in the root task and starts no subagent.
 - **Partition dispatch.** Distinct semantic work units are distributed across no more than the configured roster and remaining task-start budget. Fewer units may use fewer workers; extra units reuse the resolved workers.
 - **Replicate dispatch.** The same brief is sent to the complete configured roster. The workflow does not silently shrink or expand it.
+
+## Deferred work
+
+- **TODO: budget-first onboarding.** Revisit when someone other than the current maintainer uses this skill collection. Add an optional setup path that proposes a complete cost-first profile from the active host's live model catalog and requires confirmation before writing it. Keep `setup-agent-mode` as the only persistent owner. The proposal must not become an execution default.

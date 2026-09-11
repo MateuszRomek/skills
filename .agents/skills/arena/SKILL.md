@@ -10,7 +10,7 @@ Run the comparison roster configured by setup against the same task. Read every 
 
 ## Start
 
-Open a todolist with one entry per phase before launching anything. The arena runs autonomously and the list keeps phases from silently disappearing.
+Open a todolist with one entry per phase before launching anything.
 
 1. Frame
 2. Fan out

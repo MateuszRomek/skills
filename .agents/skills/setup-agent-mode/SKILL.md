@@ -81,10 +81,6 @@ roles:
     workers:
       - model: <confirmed-model-id>
         reasoning: <confirmed-reasoning-effort>
-  how-critics:
-    execution: workers
-    workers:
-      - inherit-parent: true
   arena-runners:
     execution: workers
     workers:

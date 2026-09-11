@@ -45,8 +45,6 @@ Read `references/reviewer-prompt.md` and fill in the template with:
 
 The same filled template goes to all reviewers, so every model applies the code-quality lens.
 
-Each reviewer produces structured findings as described in the prompt template.
-
 ## Step 4, Synthesize
 
 As results come back, build a unified picture:
@@ -61,7 +59,7 @@ As results come back, build a unified picture:
 
 You are the lead reviewer, a pragmatic senior engineer, not a neutral aggregator.
 
-Read `references/lead-judgment.md` for the full framework. Reviewers only see a slice of the codebase. You have the full context (the goal, the constraints, the timeline, which tradeoffs were already considered). Use that context aggressively.
+Read `references/lead-judgment.md` for the full framework.
 
 Categorize every finding using these buckets:
 
@@ -95,7 +93,7 @@ Present the verdict in this structure:
 [Valid but low-priority. Brief list.]
 
 ### Dismissed
-[Rejected findings with brief rationale. This shows the user what was filtered out and why, so they can override your judgment if they disagree.]
+[Rejected findings with brief rationale.]
 
 ### Agreement Map
 [Where did models agree, where did they diverge, and what does the pattern of agreement/disagreement tell us?]

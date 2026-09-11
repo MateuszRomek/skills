@@ -1,3 +1,5 @@
 .DS_Store
 skills-lock.json
 .agents/agent-mode/models.*.local.yaml
+.agents/scripts/skill-cost.py
+.agents/scripts/test_skill_cost.py

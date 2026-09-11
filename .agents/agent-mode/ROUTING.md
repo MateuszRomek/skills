@@ -26,7 +26,6 @@ Each role has a dispatch behavior. `partition` distributes distinct work units a
 | `reviewer` | replicate | unavailable | Independent review without a specialist review role. |
 | `how-explorer` | partition | perform | `how` source exploration. |
 | `how-explainer` | replicate | perform | `how` explanation and synthesis. |
-| `how-critics` | replicate | unavailable | `how` architectural criticism. |
 | `why-investigators` | partition | perform | `why` evidence-source investigation. |
 | `why-synthesizer` | replicate | perform | `why` synthesis. |
 | `reflect-tooling` | replicate | perform | Tooling review in `reflect`. |

@@ -5,7 +5,7 @@ description: Prepare, open, or update a GitHub pull request for review. Use when
 
 # Prepare Pull Request
 
-Treat the pull request as a **review handoff**: a reviewer can understand the user-facing change, inspect its implementation, reproduce its validation, and trace it to its source ticket without asking for missing context.
+Treat the pull request as a briefing a reviewer can read in under a minute. Explain why the change exists, what it changes, what it can affect, and how you proved it works. Keep detailed logs in linked artifacts.
 
 ## 1. Establish the handoff
 
@@ -17,34 +17,46 @@ Complete this step when the change, its validation, and its ticket relationship 
 
 ## 2. Write the pull request body
 
-Use exactly these sections, in this order:
+Use these sections in order. Drop Tradeoffs when no real choice needs explanation.
 
 ```md
-## Business change
+## Why
 
-<Briefly state what changes for the user, customer, or product and why it matters.>
+<State the intent and approach in one or two short paragraphs.>
 
-## Technical changes
+## Scope
 
-<Briefly state the main implementation changes.>
+- <Name the main symbols and paths changed.>
+- <State an important exclusion when the boundary matters.>
 
-## How to test
+## Tradeoffs
 
-1. <Executable verification step.>
-2. <Executable verification step and expected result.>
+<Name only a rejected alternative that a reviewer would otherwise ask about.>
+
+## Blast radius
+
+<In one to three sentences, name what the change touches and why it is safe or risky.>
+
+## Verification
+
+- <Name a check that ran and its observed result.>
+- <For a performance change, report the primary before and after value with its unit.>
 
 ## References
 
 Closes #<issue-number>
 ```
 
-- Keep the business and technical sections concise and specific to the delivered diff; omit neither section.
-- Make **How to test** a short ordered list whenever the steps have a meaningful order. Use bullets only when the checks are independent. Include the relevant command, route, or user action and the expected result where it removes ambiguity.
+- Keep the body near 40 lines or fewer. The squash commit may reuse it.
+- Keep Why, Scope, Blast radius, Verification, and References. Include Tradeoffs only for a real decision.
+- Use Scope bullets for meaningful symbols and paths. Do not write a file-by-file account.
+- Report checks that actually ran and their outcomes. Include a command, route, or user action when it helps a reviewer reproduce the result.
+- Link detailed measurements, screenshots, or decision logs. Do not paste full SHAs, agent transcripts, lane summaries, large metric tables, or generic verdicts.
 - For a GitHub issue in the same repository, put `Closes #<issue-number>` in **References** exactly. This is the closing keyword that makes GitHub close the issue after the pull request is merged into its target branch; a bare `#<issue-number>` is not enough.
 - For a ticket outside GitHub or in another repository, include its canonical reference in **References**. Do not claim it will close automatically.
 - If no ticket applies, retain **References** and write `No ticket.` Do not invent an issue reference.
 
-Complete this step when all four sections are present, factual, and the reference either has a valid closing keyword or explicitly states that no ticket applies.
+Complete this step when every retained section is factual and the reference either has a valid closing keyword or explicitly states that no ticket applies.
 
 ## 3. Publish for review
 
@@ -53,4 +65,4 @@ Complete this step when all four sections are present, factual, and the referenc
 3. Set the requested base branch; otherwise use the repository's normal default branch. Preserve the branch and complete diff unless the user directs a narrower scope.
 4. After publishing, read the pull request and verify its target branch, body, URL, and review state. The normal completion state is open and non-draft (`isDraft: false`).
 
-Complete this step only when GitHub shows the pull request with the required body and state, and report its URL, state, test instructions, and linked ticket.
+Complete this step only when GitHub shows the pull request with the required body and state. Report its URL, state, verification, and linked ticket.

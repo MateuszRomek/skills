@@ -6,22 +6,22 @@ disable-model-invocation: true
 
 # Show me your work
 
-For work a human reviews after the fact, a decision trail lets them reconstruct what was decided, why, and on what evidence, without rerunning the work or reading the whole transcript. Keep one canonical log so the trail is consistent and a future agent can find it.
+Keep one canonical log.
 
 ## The format
 
-A single TSV file, one row per decision. TSV because GitHub renders it as a sortable table, `column -s$'\t' -t` and spreadsheets read it, and a row appends with one command. Cells stay single-line. Evidence is a pointer, not prose.
+A single TSV file, one row per decision. Cells stay single-line. Evidence is a pointer, not prose.
 
 Copy `references/decision-log-template.tsv` (the header row) to start a clean log. Columns:
 
-- **ts.** ISO8601 timestamp. The timeline axis.
+- **ts.** ISO8601 timestamp.
 - **phase.** The phase or workstream.
 - **decision.** What was chosen or done, one line.
-- **why.** The reason in plain words. If a principle drove it, say it plainly (`explored options first, this was a one-way door`), not as a jargon tag.
+- **why.** The reason in plain words. If a principle drove it, say it plainly, not as a jargon tag.
 - **evidence.** A link or path that proves it: commit SHA, PR number, `file:line`, or an artifact, trace, or screenshot path. Never a paragraph.
 - **result.** The outcome or predicate state: `tests green`, `reverted`, `pixel-diff 0`, `INCONCLUSIVE`, `open`.
 
-An example, plain-spoken so a reviewer reads it at a glance. This is illustration only; don't copy these rows into a real log.
+An example, plain-spoken so a reviewer reads it at a glance. This is illustration only. Don't copy these rows into a real log.
 
 ```
 ts	phase	decision	why	evidence	result
