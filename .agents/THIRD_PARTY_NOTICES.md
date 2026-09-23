@@ -17,3 +17,11 @@ The derived skills have been modified for host portability, bounded local model 
 - License: MIT. See [`LICENSES/mattpocock-skills-MIT.txt`](LICENSES/mattpocock-skills-MIT.txt).
 
 The derived skills have been combined with Agent mode and adapted to the repository's tracker, domain documentation, implementation, and delivery workflows.
+
+## marketingskills
+
+- Author: Corey Haines
+- Source: https://github.com/coreyhaines31/marketingskills
+- License: MIT. See [`LICENSES/marketingskills-MIT.txt`](LICENSES/marketingskills-MIT.txt).
+
+The `copywriting` and `copy-editing` skills include their upstream reference files and evaluations.
