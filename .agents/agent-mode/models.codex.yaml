@@ -1,0 +1,115 @@
+version: 2
+host: codex
+intent:
+  optimization: "Quality with restrained usage; Astra low for judgment and ideas, Sol medium for execution and reading"
+  budget: "none"
+delegation:
+  mode: enabled
+  max-workers-per-task: 8
+  max-concurrent-workers: 3
+  max-delegation-depth: 1
+roles:
+  feature:
+    execution: coordinator
+  refactoring:
+    execution: coordinator
+  bug-fix:
+    execution: coordinator
+  perf-issue:
+    execution: coordinator
+  hillclimb:
+    execution: coordinator
+  judgment-prose:
+    execution: workers
+    workers:
+      - model: gpt-6-astra
+        reasoning: low
+  hardest-tasks:
+    execution: workers
+    workers:
+      - model: gpt-6-astra
+        reasoning: low
+  bulk-reader:
+    execution: workers
+    workers:
+      - model: gpt-5.6-sol
+        reasoning: medium
+  comment-sicko:
+    execution: workers
+    workers:
+      - model: gpt-5.6-sol
+        reasoning: medium
+  reviewer:
+    execution: workers
+    workers:
+      - model: gpt-6-astra
+        reasoning: low
+  how-explorer:
+    execution: workers
+    workers:
+      - model: gpt-5.6-sol
+        reasoning: medium
+  how-explainer:
+    execution: coordinator
+  why-investigators:
+    execution: workers
+    workers:
+      - model: gpt-5.6-sol
+        reasoning: medium
+  why-synthesizer:
+    execution: coordinator
+  reflect-tooling:
+    execution: workers
+    workers:
+      - model: gpt-5.6-sol
+        reasoning: medium
+  reflect-judgment:
+    execution: workers
+    workers:
+      - model: gpt-6-astra
+        reasoning: low
+  reflect-divergent:
+    execution: workers
+    workers:
+      - model: gpt-6-astra
+        reasoning: low
+  reflect-synthesizer:
+    execution: coordinator
+  arena-runners:
+    execution: workers
+    workers:
+      - model: gpt-6-astra
+        reasoning: low
+      - model: gpt-6-astra
+        reasoning: low
+  arena-cross-judge:
+    execution: workers
+    workers:
+      - model: gpt-6-astra
+        reasoning: low
+  swarm-worker:
+    execution: workers
+    workers:
+      - model: gpt-5.6-sol
+        reasoning: medium
+      - model: gpt-5.6-sol
+        reasoning: medium
+  architect-runners:
+    execution: workers
+    workers:
+      - model: gpt-6-astra
+        reasoning: low
+      - model: gpt-6-astra
+        reasoning: low
+  interrogate-reviewers:
+    execution: workers
+    workers:
+      - model: gpt-6-astra
+        reasoning: low
+      - model: gpt-6-astra
+        reasoning: low
+  researcher:
+    execution: workers
+    workers:
+      - model: gpt-5.6-sol
+        reasoning: medium

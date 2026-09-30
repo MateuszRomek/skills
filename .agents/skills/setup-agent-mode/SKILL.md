@@ -1,19 +1,19 @@
 ---
 name: setup-agent-mode
-description: "Configure every host-local Agent mode delegation choice: whether delegation is enabled, task and concurrency limits, nesting depth, and each role's exact worker roster, model, and reasoning effort. Use for /setup-agent-mode, configure agent mode, or changing its execution profile."
+description: "Configure project or local Agent mode delegation choices: whether delegation is enabled, task and concurrency limits, nesting depth, and each role's exact worker roster, model, and reasoning effort. Use for /setup-agent-mode, configure agent mode, or changing its execution profile."
 ---
 
 # Setup Agent mode
 
-Install the shared Agent mode files in the current repository, then write `.agents/agent-mode/models.<host>.local.yaml` for the current coding-agent host. This local profile is the only persistent source of delegation limits, worker counts, models, reasoning efforts, and inheritance choices. [`assets/agent-mode/ROUTING.md`](assets/agent-mode/ROUTING.md) defines only the stable role names and their work semantics; it contains no execution defaults.
+Install the shared Agent mode files in the current repository, then write `.agents/agent-mode/models.<host>.yaml` for the current coding-agent host by default. This project profile is intended to be committed and pushed. Write `.agents/agent-mode/models.<host>.local.yaml` only when the user requests a local override. The selected profile is the only persistent source of delegation limits, worker counts, models, reasoning efforts, and inheritance choices. [`assets/agent-mode/ROUTING.md`](assets/agent-mode/ROUTING.md) defines only the stable role names and their work semantics; it contains no execution defaults.
 
 ## Steps
 
 ### 1. Install the shared Agent mode files
 
-Read [`assets/agent-mode/HOST-COMPATIBILITY.md`](assets/agent-mode/HOST-COMPATIBILITY.md). Copy the contents of `assets/agent-mode` from this skill directory to `.agents/agent-mode` in the current repository. Create the destination when it does not exist. Refresh the shared reference and agent definitions on every run, but preserve every `models.*.local.yaml` file already present.
+Read [`assets/agent-mode/HOST-COMPATIBILITY.md`](assets/agent-mode/HOST-COMPATIBILITY.md). Copy the contents of `assets/agent-mode` from this skill directory to `.agents/agent-mode` in the current repository. Create the destination when it does not exist. Refresh the shared reference and agent definitions on every run, but preserve every existing `models.*.yaml` profile, including local overrides.
 
-Ensure that the repository ignores `.agents/agent-mode/models.*.local.yaml`. Do not change unrelated ignore rules.
+Ensure that the repository ignores `.agents/agent-mode/models.*.local.yaml`. Keep `.agents/agent-mode/models.<host>.yaml` trackable by git. If an ignore rule covers it, narrow that rule or add a profile-specific exception. Do not change unrelated ignore rules.
 
 Complete this step when `.agents/agent-mode/HOST-COMPATIBILITY.md`, `.agents/agent-mode/ROUTING.md`, and both files under `.agents/agent-mode/agents` match the packaged assets.
 
@@ -46,13 +46,17 @@ Recommendations are proposals, not defaults. Do not write numeric limits, roster
 
 ### 4. Load current state
 
-Load `.agents/agent-mode/models.<host>.local.yaml` when it exists. Treat a version 2 profile as the current proposal to review, not proof that its tradeoffs still match the user's goal. Treat every earlier version as unconfigured: it may inform a proposal, but every limit and route must be reconfirmed before writing version 2. Until then, Agent mode starts no workers.
+Choose the write target from the requested scope: the project profile by default, or the local profile when explicitly requested. Load that target when it exists. When it is absent, load the active profile selected by `HOST-COMPATIBILITY.md` as the starting proposal. This lets an existing local profile seed the first project profile without changing its assignments or deleting it.
+
+Show the write target and the active profile separately. If a local override exists while writing a project profile, explain that this checkout will continue using the local override, while checkouts without it will use the project profile.
+
+Treat a version 2 profile as the current proposal to review, not proof that its tradeoffs still match the user's goal. Treat every earlier version as unconfigured: it may inform a proposal, but every limit and route must be reconfirmed before writing version 2. Until then, Agent mode starts no workers.
 
 ### 5. Recommend, map, and confirm
 
 Propose explicit assignments supported by the active host. Match stronger reasoning to ambiguous, cross-cutting, algorithmic, and judgment-heavy roles. Match cheaper or faster models to narrow exploration and mechanical checks. Keep the recommendation inside the confirmed model set and budget. If the requested budget cannot support the requested quality or roster sizes, say so and offer the smallest useful adjustment.
 
-Show delegation mode, every delegation limit, and every role from `ROUTING.md`. For coordinator routes, show `coordinator`. For worker routes, show the exact roster length and every model/reasoning assignment. Explain non-obvious choices and mark stale identifiers. Ask the user to confirm or revise the complete profile before writing. Do not infer a special roster size, model family, or reasoning level from a role name.
+Show the write scope and path, delegation mode, every delegation limit, and every role from `ROUTING.md`. For coordinator routes, show `coordinator`. For worker routes, show the exact roster length and every model/reasoning assignment. Explain non-obvious choices and mark stale identifiers. Ask the user to confirm or revise the complete profile before writing. Do not infer a special roster size, model family, or reasoning level from a role name.
 
 ### 6. Validate
 
@@ -60,7 +64,7 @@ The file's top-level `host` must equal the resolved host slug. Every explicit mo
 
 ### 7. Write the rule
 
-Overwrite `.agents/agent-mode/models.<host>.local.yaml` so reruns stay idempotent. Use this shape:
+Write the confirmed profile to the selected target so reruns stay idempotent. Default to `.agents/agent-mode/models.<host>.yaml`; use `.agents/agent-mode/models.<host>.local.yaml` only for an explicitly requested local override. Preserve the other profile. Use this shape:
 
 ```yaml
 version: 2
@@ -92,7 +96,7 @@ The angle-bracketed values describe the schema. Replace them with user-confirmed
 
 ### 8. Confirm
 
-Show the host, delegation mode, optimization goal, budget or cost posture, total task worker limit, concurrency limit, delegation depth, file path, coordinator roles, explicit worker rosters, intentionally inherited entries, and any unavailable combinations rejected during setup. Re-running this skill updates only the current host's file.
+Show the host, delegation mode, optimization goal, budget or cost posture, total task worker limit, concurrency limit, delegation depth, file path, coordinator roles, explicit worker rosters, intentionally inherited entries, and any unavailable combinations rejected during setup. Report which file this checkout will select and whether a local override masks the project profile. Re-running this skill updates only the selected scope for the current host. A project profile is ready for the user's commit and push; setup itself does not stage, commit, or push it.
 
 ### 9. Offer a verification skill (optional)
 

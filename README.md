@@ -21,7 +21,11 @@ $setup-agent-mode
 $setup-engineering-workspace
 ```
 
-`setup-agent-mode` installs the shared files under `.agents/agent-mode` and configures local model routing for the active host. `setup-engineering-workspace` configures the issue tracker, triage labels, and domain documentation used by the planning skills.
+`setup-agent-mode` installs the shared files under `.agents/agent-mode` and configures project model routing for the active host. `setup-engineering-workspace` configures the issue tracker, triage labels, and domain documentation used by the planning skills.
+
+Setup writes `.agents/agent-mode/models.<host>.yaml` by default. Commit and push this profile with your project so other checkouts, including cloud environments, receive the configured roles, model assignments, and delegation limits. Setup does not commit or push files itself.
+
+For a machine-specific configuration, explicitly request a local override during setup. It writes `.agents/agent-mode/models.<host>.local.yaml`, which remains ignored by git. Skills select the complete local profile when present and otherwise use the project profile. An invalid local profile blocks delegation rather than falling through. Each environment validates the selected profile against its live host capabilities before delegating.
 
 To install every skill in the current project for Codex without prompts, run:
 

@@ -42,7 +42,12 @@ Give each configured worker a bounded task, its own writable location when it ed
 
 ## Model routing
 
-After resolving the host, look for `.agents/agent-mode/models.<host>.local.yaml`. The file is machine-local and ignored by git. Delegation requires a version 2 profile whose top-level `host` matches the resolved slug. Validate the complete enabled profile before the first worker starts.
+After resolving the host, select one complete profile from the current repository:
+
+1. Use `.agents/agent-mode/models.<host>.local.yaml` when it exists. This optional local override is ignored by git.
+2. Otherwise use `.agents/agent-mode/models.<host>.yaml`. This project profile is intended to be committed and pushed so other checkouts, including cloud environments, receive the same routing choices.
+
+The local profile replaces the entire project profile. Validate the selected file without merging fields or worker rosters. An invalid local profile blocks delegation; it does not fall through to the project profile. Delegation requires a version 2 profile whose top-level `host` matches the resolved slug. Validate the complete enabled profile before the first worker starts. Profile selection is the same in local and cloud environments; live host capabilities still determine which tools and assignments can run.
 
 Missing profiles, version 1 profiles, host mismatches, missing roles, invalid routes, and unavailable model or reasoning values authorize zero workers. Do not inherit, substitute, shrink a replicated roster, or invent a count. Perform coordinator-capable work in the coordinator and report other work unavailable. Ask the user to run `setup-agent-mode` before later delegation.
 

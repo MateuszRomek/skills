@@ -4,7 +4,7 @@ This file is the source of truth for Agent mode work roles. Setup reads it when 
 
 ## Policy
 
-Setup records execution policy in the host-local profile. This catalog contains no worker count, model, reasoning effort, concurrency value, or fallback.
+Setup records execution policy in the selected host profile. This catalog contains no worker count, model, reasoning effort, concurrency value, or fallback.
 
 Each role has a dispatch behavior. `partition` distributes distinct work units across the configured roster. `replicate` sends the same brief to every configured worker. The behavior describes the work, never its size.
 
@@ -41,4 +41,4 @@ Each role has a dispatch behavior. `partition` distributes distinct work units a
 
 ## Selection
 
-Use the narrowest matching role. A workflow submits semantic units for `partition` or one shared brief for `replicate`. The host-local profile is the only source of execution mode, worker roster, model, reasoning effort, task budget, concurrency, and delegation depth. A current-task override exists only when the user states it explicitly.
+Use the narrowest matching role. A workflow submits semantic units for `partition` or one shared brief for `replicate`. The selected host profile is the only source of execution mode, worker roster, model, reasoning effort, task budget, concurrency, and delegation depth. A current-task override exists only when the user states it explicitly.
