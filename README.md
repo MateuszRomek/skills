@@ -6,6 +6,17 @@ Agent Mode is heavily inspired by [pstack](https://github.com/cursor/plugins/tre
 
 Lauren also wrote an excellent [guide to pstack](https://x.com/poteto/status/2094457600259842065). I recommend reading it to understand the ideas behind this workflow.
 
+## Supported hosts
+
+The skills are host-neutral and are used daily in both Codex and Claude Code:
+
+| Host | Install target | Invoke a skill | Model profile |
+| --- | --- | --- | --- |
+| Codex | `--agent codex` | `$skill-name` | `.agents/agent-mode/models.codex.yaml` |
+| Claude Code | `--agent claude-code` | `/skill-name` | `.agents/agent-mode/models.claude-code.yaml` |
+
+Antigravity is also recognized by Agent mode, and the [`skills` CLI](https://github.com/vercel-labs/skills) can install the collection into Cursor and other agents. Host-specific behavior such as delegation, structured questions, and model selection is resolved at runtime through [`HOST-COMPATIBILITY.md`](.agents/agent-mode/HOST-COMPATIBILITY.md), so a skill never assumes one host's tools.
+
 ## Install
 
 Use the interactive installer to choose skills and agents:
@@ -17,29 +28,31 @@ npx skills add MateuszRomek/skills
 After installation, invoke these setup skills once in each project:
 
 ```text
-$setup-agent-mode
-$setup-engineering-workspace
+$setup-agent-mode               # Codex
+/setup-agent-mode               # Claude Code
+$setup-engineering-workspace    # Codex
+/setup-engineering-workspace    # Claude Code
 ```
 
 `setup-agent-mode` installs the shared files under `.agents/agent-mode` and configures project model routing for the active host. `setup-engineering-workspace` configures the issue tracker, triage labels, and domain documentation used by the planning skills.
 
-Setup writes `.agents/agent-mode/models.<host>.yaml` by default. Commit and push this profile with your project so other checkouts, including cloud environments, receive the configured roles, model assignments, and delegation limits. Setup does not commit or push files itself.
+Setup writes `.agents/agent-mode/models.<host>.yaml` by default, one profile per host. Run `setup-agent-mode` once in each host you use; a Codex profile and a Claude Code profile live side by side, and each host only reads its own. Commit and push this profile with your project so other checkouts, including cloud environments, receive the configured roles, model assignments, and delegation limits. Setup does not commit or push files itself.
 
 For a machine-specific configuration, explicitly request a local override during setup. It writes `.agents/agent-mode/models.<host>.local.yaml`, which remains ignored by git. Skills select the complete local profile when present and otherwise use the project profile. An invalid local profile blocks delegation rather than falling through. Each environment validates the selected profile against its live host capabilities before delegating.
 
-To install every skill in the current project for Codex without prompts, run:
+To install every skill in the current project for both Codex and Claude Code without prompts, run:
 
 ```bash
-npx skills add MateuszRomek/skills --agent codex --skill '*'
+npx skills add MateuszRomek/skills --agent codex claude-code --skill '*'
 ```
 
-To install every skill globally for Codex, run:
+To install every skill globally instead, add `--global`:
 
 ```bash
-npx skills add MateuszRomek/skills --global --agent codex --skill '*'
+npx skills add MateuszRomek/skills --global --agent codex claude-code --skill '*'
 ```
 
-The [`skills` CLI](https://github.com/vercel-labs/skills) supports Codex, Cursor, Claude Code, Antigravity, and other agents.
+List a single agent after `--agent` to target only one host.
 
 To inspect the available skills before installation, run:
 
@@ -94,9 +107,13 @@ The repository intentionally excludes skills tied to a specific application libr
   agent-mode/       Shared host compatibility and agent definitions
   skills/           Flat collection of installable skills
   LICENSES/         Original third-party license notices
+.claude/
+  skills -> ../.agents/skills
 ```
 
 Every installable skill lives at `.agents/skills/<skill-name>/SKILL.md`. The skill name in its frontmatter matches the directory name.
+
+`.claude/skills` is a symlink to `.agents/skills`, so Claude Code sessions opened in this repository see the same skills Codex does. `.agents/skills` remains the source of truth; edit skills there.
 
 ## License
 
