@@ -78,7 +78,8 @@ The collection includes:
 - `agent-mode` and its task playbooks;
 - architecture and exploration skills such as `how`, `why`, `architect`, and `arena`;
 - implementation workflows such as `implement-specification` and `tdd`;
-- verification and review workflows such as `create-verification-skill`, `interrogate`, `swarm`, and `blast-radius`;
+- verification and review workflows such as `create-verification-skill`, `interrogate`, `swarm`, `blast-radius`, and `benchmark-checklist`;
+- `correct`, which turns repeated agent mistakes into architecture, types, and checks;
 - planning skills adapted from Matt Pocock's collection, including `grilling`, `domain-modeling`, `wayfinder`, `to-spec`, and `to-tickets`;
 - local delivery skills such as `prepare-pull-request` and `merge-when-ci-passes`;
 - reusable engineering principles under `principle-*`;
