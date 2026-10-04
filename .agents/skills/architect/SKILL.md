@@ -32,7 +32,7 @@ Dispatch the shared design-sketch brief as `architect-runners` through [`HOST-CO
 
 Use the complete configured `architect-runners` roster and keep every returned design structurally independent. Compare whole-shape alternatives, not point fixes inside one shape. If the configured roster produces no independent comparison, state that limitation instead of silently adding candidates. This is the **exhaust-the-design-space** principle skill constrained by the user's routing choice.
 
-Screen every candidate against [`references/design-red-flags.md`](references/design-red-flags.md) before synthesis. Reject or revise shallow modules, information leakage, temporal decomposition, and pass-through methods.
+Screen every candidate against [`references/design-red-flags.md`](references/design-red-flags.md) before synthesis. Assume the next contributor is an agent that sees only the files it opened, copies the nearest example, and takes the shortest path that compiles. Prefer the design where a change that looks right from one file is right for the whole repo.
 
 Compare viable candidates on interface depth. Prefer the design that hides more complexity behind a smaller, simpler public surface. A rich interface can keep call chains short by concentrating capability instead of scattering it across layers.
 
