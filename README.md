@@ -113,7 +113,13 @@ The repository intentionally excludes skills tied to a specific application libr
 
 Every installable skill lives at `.agents/skills/<skill-name>/SKILL.md`. The skill name in its frontmatter matches the directory name.
 
-`.claude/skills` is a symlink to `.agents/skills`, so Claude Code sessions opened in this repository see the same skills Codex does. `.agents/skills` remains the source of truth; edit skills there.
+`.agents/skills` is the source of truth; edit skills there. To let Claude Code sessions opened in this repository see the same skills Codex does, create a local symlink:
+
+```bash
+ln -s ../.agents/skills .claude/skills
+```
+
+The symlink is gitignored. Committing it makes every skill match two paths, and `npx skills update` then skips them in consuming projects.
 
 ## License
 
