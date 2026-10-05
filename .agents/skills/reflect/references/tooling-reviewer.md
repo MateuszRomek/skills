@@ -18,6 +18,18 @@ Examples of the pattern:
 - User describes a flaky test the agent could have queried via an observability MCP. Routing: the debugging skill should mention the observability MCP.
 - User links a chat thread the agent could have fetched via a chat MCP. Routing: the relevant skill should mention the chat MCP.
 
+## Lens addition: the agent's environment
+
+Flag each place where the repository, not a skill, made the session slower or let a mistake through. Read the repository's own check commands first (package scripts, build-tool targets, CI workflows, pre-commit config), so an existing check that is unwired or broken is the finding, not a reinvented one.
+
+- **Navigation.** The agent took long to find a file or fact, or tripped on a hidden dependency between files. A navigation pointer in a steering file or doc would have sent it there directly.
+- **Guardrails.** The agent made a mistake that a lint, type check, test, or file-layout check could catch. A repository with no guardrail at all (no pre-commit hook and no CI job running its lint, type check, or tests) is itself a finding.
+- **Steering files.** `AGENTS.md`, `CLAUDE.md`, or a global equivalent holds rules that belong in a check or a review-time standards file, or instructions that changed nothing the agent did. Steering files are loaded for every task, so they should hold pointers, not rules.
+- **Tool economy.** A tool call, CLI, or MCP returned far more than the agent needed, or the agent repeated an expensive call.
+- **Information access.** A fact the agent needed was unreachable, such as dev-server logs it could not read or a third-party service with no read-only access.
+
+Classify a mechanical violation (a banned API, an import shape, a file-location rule, a fixed syntactic pattern) as a check to build, never as more prose.
+
 Read the active transcript at <ABSOLUTE_PATH> (or use the digest below if no path is given).
 
 Scan for:
@@ -30,7 +42,7 @@ Scan for:
 
 ## Scope to skills and tools the session actually used
 
-Findings must point to skills, tools, or MCPs invoked in this transcript. Speculative routings to skills the parent never opened do not count. To check whether a skill was used, scan the transcript for:
+Skill findings must point to skills, tools, or MCPs invoked in this transcript. Environment findings must point to a concrete moment in the transcript. Speculative routings to skills the parent never opened do not count. To check whether a skill was used, scan the transcript for:
 
 - Reads of any repository, user-level, system, or plugin `SKILL.md`
 - Delegation prompts that name a skill path
@@ -46,7 +58,7 @@ If a skill was neither invoked nor a missed-trigger candidate, drop it.
 Surface 3-5 durable learnings. For each:
 - Principle: one sentence naming the convention or technical fact. Concrete enough that a future agent recognizes when it applies.
 - Evidence: the exact moment in the transcript (turn number or short quote, including the command or flag).
-- Routing: most relevant existing skill (give the `SKILL.md` path as it appears in the transcript), OR `tune description: <skill path>` when the skill should have triggered but didn't, OR "new skill: <kebab-name>".
+- Routing: most relevant existing skill (give the `SKILL.md` path as it appears in the transcript), OR `tune description: <skill path>` when the skill should have triggered but didn't, OR "new skill: <kebab-name>", OR `check: <mechanism>` for a guardrail to build, OR `steering: <file>` for a pointer to add or a no-op instruction to delete.
 
 Skip trivial things (typos, retries). Skip anything already obvious from the existing skill the parent followed. Skip implementation details that drift: specific SHAs, current file paths, version numbers, exact byte counts. Convention generalizes. Pinned details don't.
 

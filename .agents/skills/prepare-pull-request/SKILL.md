@@ -26,7 +26,8 @@ Use these sections in order. Drop Tradeoffs when no real choice needs explanatio
 
 ## Scope
 
-- <Name the main symbols and paths changed.>
+<The smallest sketch that shows the change: a diff-sketch, call tree, file tree, or Mermaid diagram. Use bullets of symbols and paths when no shape matters.>
+
 - <State an important exclusion when the boundary matters.>
 
 ## Tradeoffs
@@ -35,12 +36,15 @@ Use these sections in order. Drop Tradeoffs when no real choice needs explanatio
 
 ## Blast radius
 
+**Door:** <one-way or two-way>
+
 <In one to three sentences, name what the change touches and why it is safe or risky.>
 
 ## Verification
 
-- <Name a check that ran and its observed result.>
-- <For a performance change, report the primary before and after value with its unit.>
+- **Before:** <the failing test, wrong output, or screenshot on the base branch>
+  **After:** <the same check passing on this branch>
+- <Name any other check that ran and its observed result.>
 
 ## References
 
@@ -49,7 +53,9 @@ Closes #<issue-number>
 
 - Keep the body near 40 lines or fewer. The squash commit may reuse it.
 - Keep Why, Scope, Blast radius, Verification, and References. Include Tradeoffs only for a real decision.
-- Use Scope bullets for meaningful symbols and paths. Do not write a file-by-file account.
+- Pick the Scope sketch per [`references/scope-sketches.md`](references/scope-sketches.md). Show only the calls, files, components, or states a reviewer needs. Do not write a file-by-file account.
+- Mark the change a **one-way door** when it is hard to walk back: a data migration, a deletion, a published API or schema, a destructive operation. Everything a revert fully undoes is a **two-way door**.
+- Prefer Before/After evidence a reviewer can see. A screenshot beats execution output for a visual change. Execution output, such as the exact test that failed and now passes, beats a description. For a performance change, report the primary before and after value with its unit. Drop Before when no prior behavior existed.
 - Report checks that actually ran and their outcomes. Include a command, route, or user action when it helps a reviewer reproduce the result.
 - Link detailed measurements, screenshots, or decision logs. Do not paste full SHAs, agent transcripts, lane summaries, large metric tables, or generic verdicts.
 - For a GitHub issue in the same repository, put `Closes #<issue-number>` in **References** exactly. This is the closing keyword that makes GitHub close the issue after the pull request is merged into its target branch; a bare `#<issue-number>` is not enough.

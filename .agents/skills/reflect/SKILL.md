@@ -1,6 +1,6 @@
 ---
 name: reflect
-description: Dispatch configured transcript-review roles, surface durable learnings, and route each accepted finding to a concrete skill edit. Use when the user says reflect.
+description: "Review a session transcript for durable learnings about skills and the agent's environment (navigation, guardrails, tool economy, steering files), then route each accepted finding to a concrete edit. Use for /reflect, 'reflect', 'retro', or a retrospective on a session."
 ---
 
 # Reflect
@@ -51,7 +51,7 @@ Dispatch the shared synthesis brief as `reflect-synthesizer`. Preserve MCP acces
 
 ### 4. Structural enforcement check
 
-Sanity-check the synthesizer's Accepted list. For any item that would be enforced more reliably by a lint rule, script, metadata flag, or runtime check, move it from Accepted to Backlog. The synthesizer already applies this criterion; this is a final pass before edits land. See the **encode-lessons-in-structure** principle skill.
+Sanity-check the synthesizer's Accepted list. For any prose item that a lint rule, script, metadata flag, hook, CI job, or runtime check would enforce more reliably, change it to a `check:` row, or move it to Backlog when the mechanism is expensive. The synthesizer already applies this criterion; this is a final pass before edits land. See the **encode-lessons-in-structure** principle skill.
 
 ### 5. Apply
 
@@ -65,6 +65,8 @@ For each approved Accepted item, follow the Routing field exactly:
 - Substantive existing-skill edit (a new section, a new pattern table, more than ~10 lines): invoke **skill-creator** and **writing-for-agents**, then run the draft / test / iterate loop.
 - `tune description: <skill path>` (the skill exists but didn't trigger when it should have): invoke **skill-creator** and run its description-optimization loop.
 - `new skill via skill-creator: <kebab-name>`: invoke **skill-creator**. Do not invent the shape ad hoc.
+- `check: <mechanism>`: invoke **correct** for the accepted set. It builds each check and proves it fails on the session's real mistake.
+- `steering: <file>`: parent edits directly. Add only a pointer to the doc or skill that holds the detail, or delete the dead instruction.
 
 If your environment ships a SKILL.md validator, run it on every touched skill before declaring done. Skip this step if it doesn't.
 
@@ -73,6 +75,7 @@ If your environment ships a SKILL.md validator, run it on every touched skill be
 Short list, no preamble:
 
 - Edits applied: `<skill path>`. What changed, one line each.
+- Checks built and steering edits: `<path>`. One line each.
 - New skills created: `<skill path>`. One line each (rare).
 - Backlog filed to the devex tracker: `<issue title>` (`<tags>`). One line each.
 - Dropped: one line per rejected finding + reason from the synthesizer.

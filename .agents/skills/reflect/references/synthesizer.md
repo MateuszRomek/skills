@@ -17,8 +17,9 @@ Apply each criterion to every finding:
 - Existing-skill-first: propose `new skill via create-skill:` only when no existing skill is a real home, the pattern recurs, and the topic deserves its own skill.
 - Convergence: findings echoed by 2+ reviewers carry higher confidence. Singletons must clear a higher bar on the other criteria.
 - Decision-changing: a future agent does something different because of the edit, not just reads more text.
-- Structural-mechanism check: route to Backlog when a lint rule, script, metadata flag, or runtime check already enforces the rule or could enforce it cheaply. Skill prose is for things mechanisms cannot enforce.
-- Skill-was-used: only accept findings that route to a skill, tool, or MCP the parent actually invoked in the transcript. If the skill wasn't used but should have been, route to `tune description: <skill path>` so it triggers next time. If neither, reject as `skill-not-used`.
+- Structural-mechanism check: when a lint rule, script, metadata flag, hook, CI job, or runtime check could enforce the rule cheaply, accept it as `check: <mechanism>` instead of skill prose. Route it to Backlog only when the mechanism is expensive or belongs to another team. Skill prose is for things mechanisms cannot enforce.
+- Steering-file economy: accept `steering:` rows only for a navigation pointer or the deletion of an instruction that changed nothing. Reject a new rule in `AGENTS.md` or `CLAUDE.md` as `structural` when a check could enforce it.
+- Skill-was-used: only accept skill findings that route to a skill, tool, or MCP the parent actually invoked in the transcript. If the skill wasn't used but should have been, route to `tune description: <skill path>` so it triggers next time. If neither, reject as `skill-not-used`.
 - Already-covered: read the target skill before accepting any body-edit row. If the proposal duplicates clear, well-placed existing guidance, reject as `already-covered`. The issue is execution, not the skill. If the existing guidance is buried, weak, or easy to skip past, accept the row but reframe the proposal as a wording / placement improvement to make it fire (not a duplicate addition).
 
 Drop (implementation details that drift):
@@ -42,6 +43,8 @@ Output exactly the format below. No preamble, no narration. One sentence per cel
 | <failure mode in a skill the parent used> | <change to that skill's body> | <skill path + section> |
 | <skill existed but didn't trigger> | <tune the skill's description so it fires next time> | <tune description: <skill path>> |
 | <new pattern, no existing skill is a real home> | <draft a new skill via create-skill> | <new skill via create-skill: <kebab-name>> |
+| <mistake a cheap check would catch, or no guardrail at all> | <the check and the command that runs it> | <check: <mechanism>> |
+| <agent got lost, or a steering instruction did nothing> | <the pointer to add or the instruction to delete> | <steering: <file>> |
 
 One row per finding. The user approves row by row.
 
