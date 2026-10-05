@@ -1,7 +1,6 @@
 ---
 name: no-comments
-description: "Spawn Comment Sicko, fix accepted findings, and offer encodings for claimed constraints."
-disable-model-invocation: true
+description: "Audit a diff's comments with the Comment Sicko reviewer, delete narrating or stale ones, fix the code they paper over, and offer to encode claimed constraints. Use for /no-comments or before handing a diff to review."
 ---
 
 # No comments

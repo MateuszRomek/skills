@@ -1,7 +1,6 @@
 ---
 name: reflect
 description: Dispatch configured transcript-review roles, surface durable learnings, and route each accepted finding to a concrete skill edit. Use when the user says reflect.
-disable-model-invocation: true
 ---
 
 # Reflect

@@ -1,7 +1,6 @@
 ---
 name: arena
 description: "Run configured competing candidates at the same task, pick a base, and graft the strongest parts of the alternatives into it. Use for /arena, 'arena this', 'throw it in the arena', or when one attempt at a non-trivial artifact would lock in the wrong shape."
-disable-model-invocation: true
 ---
 
 # Arena
