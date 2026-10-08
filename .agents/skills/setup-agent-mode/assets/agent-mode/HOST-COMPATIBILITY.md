@@ -12,7 +12,7 @@ Resolve the host from identity supplied by the running product, such as runtime 
 | Claude Code | `claude-code` |
 | Antigravity | `antigravity` |
 
-A host selected explicitly by the user during `setup-agent-mode` is also resolved. Repository directories, installed CLIs, environment leftovers, and model names are not host identity. If runtime signals conflict or none explicitly identify the product, leave the host unresolved.
+A host selected explicitly by the user during `setup-agent-mode` is also resolved. Normalize a product missing from the table to its lowercase, hyphenated name, such as `t3-code` for T3 Code. Repository directories, installed CLIs, environment leftovers, and model names are not host identity. If runtime signals conflict or none explicitly identify the product, leave the host unresolved.
 
 Host identity and host capability are separate. Inspect the live tool schema before using delegation, structured input, task history, waiting, or model overrides. A known host does not imply that every installation or session exposes the same tools.
 
