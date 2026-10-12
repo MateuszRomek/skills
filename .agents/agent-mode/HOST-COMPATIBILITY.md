@@ -12,7 +12,7 @@ Resolve the host from identity supplied by the running product, such as runtime 
 | Claude Code | `claude-code` |
 | Antigravity | `antigravity` |
 
-A host selected explicitly by the user during `setup-agent-mode` is also resolved. Repository directories, installed CLIs, environment leftovers, and model names are not host identity. If runtime signals conflict or none explicitly identify the product, leave the host unresolved.
+A host selected explicitly by the user during `setup-agent-mode` is also resolved. Normalize a product missing from the table to its lowercase, hyphenated name, such as `t3-code` for T3 Code. Repository directories, installed CLIs, environment leftovers, and model names are not host identity. If runtime signals conflict or none explicitly identify the product, leave the host unresolved.
 
 Host identity and host capability are separate. Inspect the live tool schema before using delegation, structured input, task history, waiting, or model overrides. A known host does not imply that every installation or session exposes the same tools.
 
@@ -44,12 +44,12 @@ Give each configured worker a bounded task, its own writable location when it ed
 
 ## Model routing
 
-After resolving the host, select one complete profile from the current repository:
+After resolving the host, select one complete profile. Use the first file that exists:
 
-1. Use `.agents/agent-mode/models.<host>.local.yaml` when it exists. This optional local override is ignored by git.
-2. Otherwise use `.agents/agent-mode/models.<host>.yaml`. This project profile is intended to be committed and pushed so other checkouts, including cloud environments, receive the same routing choices.
+1. Repository `.agents/agent-mode/models.<host>.yaml`. This project profile is intended to be committed and pushed so other checkouts, including cloud environments, receive the same routing choices.
+2. Global `~/.agents/agent-mode/models.<host>.yaml`. This personal profile applies to every repository on the machine that has no repository profile.
 
-The local profile replaces the entire project profile. Validate the selected file without merging fields or worker rosters. An invalid local profile blocks delegation; it does not fall through to the project profile. Delegation requires a version 2 profile whose top-level `host` matches the resolved slug. Validate the complete enabled profile before the first worker starts. Profile selection is the same in local and cloud environments; live host capabilities still determine which tools and assignments can run.
+The selected profile replaces the global profile. Validate it without merging fields or worker rosters. An invalid repository profile blocks delegation; it does not fall through to the global profile. A global profile lives on one machine, so a cloud environment sees it only when that environment's home directory contains it. Commit a project profile when cloud runs must share the routing. `scripts/select-profile.py` in the `setup-agent-mode` skill resolves the selected path and scope deterministically. Delegation requires a version 2 profile whose top-level `host` matches the resolved slug. Validate the complete enabled profile before the first worker starts. Profile selection is the same in local and cloud environments; live host capabilities still determine which tools and assignments can run.
 
 Missing profiles, version 1 profiles, host mismatches, missing roles, invalid routes, and unavailable model or reasoning values authorize zero workers. Do not inherit, substitute, shrink a replicated roster, or invent a count. Perform coordinator-capable work in the coordinator and report other work unavailable. Ask the user to run `setup-agent-mode` before later delegation.
 
@@ -64,7 +64,7 @@ Before the first delegation in a top-level Agent mode workflow, report the resol
 ```text
 Agent mode preflight
 Host: <resolved-host>
-Profile: <validated-profile-path-or-unavailable>
+Profile: <validated-profile-path-or-unavailable> (<repo|global>)
 Delegation: <enabled-or-disabled>
 Task worker limit: <configured-limit>
 Workers already started: <count>
