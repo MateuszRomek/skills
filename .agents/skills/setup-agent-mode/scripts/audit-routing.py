@@ -1,13 +1,15 @@
 #!/usr/bin/env python3
 
 import re
+import sys
 from pathlib import Path
 
 
-ROOT = Path.cwd()
-ROUTING = ROOT / ".agents/agent-mode/ROUTING.md"
-HOST = ROOT / ".agents/agent-mode/HOST-COMPATIBILITY.md"
-ASSET_ROOT = ROOT / ".agents/skills/setup-agent-mode/assets/agent-mode"
+SKILLS = Path(__file__).resolve().parents[2]
+ASSET_ROOT = SKILLS / "setup-agent-mode/assets/agent-mode"
+AGENT_MODE = Path(sys.argv[1]) if len(sys.argv) > 1 else Path.cwd() / ".agents/agent-mode"
+ROUTING = AGENT_MODE / "ROUTING.md"
+HOST = AGENT_MODE / "HOST-COMPATIBILITY.md"
 
 
 def fail(messages: list[str]) -> None:
@@ -33,7 +35,7 @@ def main() -> None:
         errors.append("ROUTING.md contains no parseable roles")
 
     for name in ("ROUTING.md", "HOST-COMPATIBILITY.md"):
-        current = ROOT / ".agents/agent-mode" / name
+        current = AGENT_MODE / name
         asset = ASSET_ROOT / name
         if current.read_bytes() != asset.read_bytes():
             errors.append(f"{current} differs from packaged asset {asset}")
@@ -49,8 +51,8 @@ def main() -> None:
             errors.append(f"central contract contains {label}")
 
     consumer_paths = sorted(
-        set((ROOT / ".agents/skills").glob("*/SKILL.md"))
-        | set((ROOT / ".agents/skills/agent-mode/playbooks").glob("*.md"))
+        set(SKILLS.glob("*/SKILL.md"))
+        | set((SKILLS / "agent-mode/playbooks").glob("*.md"))
     )
     role_token = re.compile(r"`(" + "|".join(map(re.escape, sorted(roles))) + r")`")
     forbidden = (
@@ -88,7 +90,7 @@ def main() -> None:
         for line_number, line in enumerate(text.splitlines(), start=1):
             for pattern, label in forbidden:
                 if pattern.search(line):
-                    errors.append(f"{path.relative_to(ROOT)}:{line_number}: {label}")
+                    errors.append(f"{path.relative_to(SKILLS)}:{line_number}: {label}")
 
     if errors:
         fail(errors)

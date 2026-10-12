@@ -5,17 +5,17 @@ description: "Advise on and configure Agent mode model routing: interview model 
 
 # Setup Agent mode
 
-Install the shared Agent mode files in the current repository, then write `.agents/agent-mode/models.<host>.yaml` for the current coding-agent host by default. This project profile is intended to be committed and pushed. Write `.agents/agent-mode/models.<host>.local.yaml` only when the user requests a local override. The selected profile is the only persistent source of delegation limits, worker counts, models, reasoning efforts, and inheritance choices. [`assets/agent-mode/ROUTING.md`](assets/agent-mode/ROUTING.md) defines only the stable role names and their work semantics; it contains no execution defaults.
+Install the shared Agent mode files in the current repository, then write `.agents/agent-mode/models.<host>.yaml` for the current coding-agent host by default. This project profile is intended to be committed and pushed. Use the `global` scope when the user asks for a personal profile that applies to every repository. It installs the shared files and writes `~/.agents/agent-mode/models.<host>.yaml`, and it never touches the current repository or its ignore rules. A global profile is selected only when the repository has no profile for the host. There is no local override. The selected profile is the only persistent source of delegation limits, worker counts, models, reasoning efforts, and inheritance choices. [`assets/agent-mode/ROUTING.md`](assets/agent-mode/ROUTING.md) defines only the stable role names and their work semantics; it contains no execution defaults.
 
 ## Steps
 
 ### 1. Install the shared Agent mode files
 
-Read [`assets/agent-mode/HOST-COMPATIBILITY.md`](assets/agent-mode/HOST-COMPATIBILITY.md). Copy the contents of `assets/agent-mode` from this skill directory to `.agents/agent-mode` in the current repository. Create the destination when it does not exist. Refresh the shared reference and agent definitions on every run, but preserve every existing `models.*.yaml` profile, including local overrides.
+Read [`assets/agent-mode/HOST-COMPATIBILITY.md`](assets/agent-mode/HOST-COMPATIBILITY.md). Copy the contents of `assets/agent-mode` from this skill directory to `.agents/agent-mode` in the current repository, or to `~/.agents/agent-mode` for the `global` scope. Create the destination when it does not exist. Refresh the shared reference and agent definitions on every run, but preserve every existing `models.*.yaml` profile.
 
-Ensure that the repository ignores `.agents/agent-mode/models.*.local.yaml`. Keep `.agents/agent-mode/models.<host>.yaml` trackable by git. If an ignore rule covers it, narrow that rule or add a profile-specific exception. Do not change unrelated ignore rules.
+For the `global` scope, leave the repository untouched. Otherwise keep `.agents/agent-mode/models.<host>.yaml` trackable by git. If an ignore rule covers it, narrow that rule or add a profile-specific exception. Do not change unrelated ignore rules.
 
-Complete this step when `.agents/agent-mode/HOST-COMPATIBILITY.md`, `.agents/agent-mode/ROUTING.md`, and both files under `.agents/agent-mode/agents` match the packaged assets.
+Complete this step when the destination's `HOST-COMPATIBILITY.md`, `ROUTING.md`, and both files under `agents` match the packaged assets.
 
 ### 2. Detect the host and available models
 
@@ -53,9 +53,9 @@ Read [`references/model-advisor.md`](references/model-advisor.md). Research ever
 
 ### 5. Load current state
 
-Choose the write target from the requested scope: the project profile by default, or the local profile when explicitly requested. Load that target when it exists. When it is absent, load the active profile selected by `HOST-COMPATIBILITY.md` as the starting proposal. This lets an existing local profile seed the first project profile without changing its assignments or deleting it.
+Choose the write target from the requested scope: the project profile by default, or the global profile for the `global` scope. Load that target when it exists. When it is absent, load the active profile selected by `HOST-COMPATIBILITY.md` as the starting proposal. This lets an existing global profile seed the first project profile without changing its assignments or deleting it.
 
-Show the write target and the active profile separately. If a local override exists while writing a project profile, explain that this checkout will continue using the local override, while checkouts without it will use the project profile.
+Show the write target and the active profile separately. If a higher-precedence profile exists while writing a lower one, name it and explain that this checkout will keep using it. For example, a repository profile masks the global profile.
 
 Treat a version 2 profile as the current proposal to review, not proof that its tradeoffs still match the user's goal. Compare its assignments with the research and flag each one the research no longer supports. Treat every earlier version as unconfigured: it may inform a proposal, but every limit and route must be reconfirmed before writing version 2. Until then, Agent mode starts no workers.
 
@@ -74,11 +74,11 @@ Show the write scope and path and mark stale identifiers. Ask the user to confir
 
 ### 7. Validate
 
-The file's top-level `host` must equal the resolved host slug. Every explicit model and reasoning effort must be supported by the current host. An explicitly selected `inherit-parent` entry passes structural validation. Reject unavailable combinations before writing. From the repository root, run `python3 .agents/skills/setup-agent-mode/scripts/validate-profile.py <profile-path> .agents/agent-mode/ROUTING.md`. Then run `python3 .agents/skills/setup-agent-mode/scripts/audit-routing.py`. Structural validation checks the version 2 contract; live host validation remains the authority for model identifiers and reasoning efforts.
+The file's top-level `host` must equal the resolved host slug. Every explicit model and reasoning effort must be supported by the current host. An explicitly selected `inherit-parent` entry passes structural validation. Reject unavailable combinations before writing. Run `python3 <skill-dir>/scripts/validate-profile.py <profile-path> <agent-mode-dir>/ROUTING.md`. Then run `python3 <skill-dir>/scripts/audit-routing.py <agent-mode-dir>`. `<agent-mode-dir>` is `.agents/agent-mode` in the repository, or `~/.agents/agent-mode` for the `global` scope. Structural validation checks the version 2 contract; live host validation remains the authority for model identifiers and reasoning efforts.
 
 ### 8. Write the rule
 
-Write the confirmed profile to the selected target so reruns stay idempotent. Default to `.agents/agent-mode/models.<host>.yaml`; use `.agents/agent-mode/models.<host>.local.yaml` only for an explicitly requested local override. Preserve the other profile. Use this shape:
+Write the confirmed profile to the selected target so reruns stay idempotent. Default to `.agents/agent-mode/models.<host>.yaml`, and `~/.agents/agent-mode/models.<host>.yaml` for the `global` scope. Preserve every other profile and every unrelated file. Use this shape:
 
 ```yaml
 version: 2
@@ -110,7 +110,7 @@ The angle-bracketed values describe the schema. Replace them with user-confirmed
 
 ### 9. Confirm
 
-Show the host, delegation mode, optimization goal, budget or cost posture, total task worker limit, concurrency limit, delegation depth, file path, coordinator roles, explicit worker rosters, intentionally inherited entries, and any unavailable combinations rejected during setup. Report which file this checkout will select and whether a local override masks the project profile. Re-running this skill updates only the selected scope for the current host. A project profile is ready for the user's commit and push; setup itself does not stage, commit, or push it.
+Show the host, delegation mode, optimization goal, budget or cost posture, total task worker limit, concurrency limit, delegation depth, file path, coordinator roles, explicit worker rosters, intentionally inherited entries, and any unavailable combinations rejected during setup. Run `python3 <skill-dir>/scripts/select-profile.py <host>` from the repository and report the scope and path it prints. Say whether a higher-precedence profile masks the one just written. Re-running this skill updates only the selected scope for the current host. A project profile is ready for the user's commit and push; setup itself does not stage, commit, or push it. A global profile stays on this machine, so cloud environments do not receive it.
 
 ### 10. Offer a verification skill (optional)
 

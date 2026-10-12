@@ -38,7 +38,12 @@ $setup-engineering-workspace    # Codex
 
 Setup writes `.agents/agent-mode/models.<host>.yaml` by default, one profile per host. Run `setup-agent-mode` once in each host you use; a Codex profile and a Claude Code profile live side by side, and each host only reads its own. Commit and push this profile with your project so other checkouts, including cloud environments, receive the configured roles, model assignments, and delegation limits. Setup does not commit or push files itself.
 
-For a machine-specific configuration, explicitly request a local override during setup. It writes `.agents/agent-mode/models.<host>.local.yaml`, which remains ignored by git. Skills select the complete local profile when present and otherwise use the project profile. An invalid local profile blocks delegation rather than falling through. Each environment validates the selected profile against its live host capabilities before delegating.
+Skills use the first profile that exists, in this order.
+
+1. Repository `.agents/agent-mode/models.<host>.yaml`
+2. Global `~/.agents/agent-mode/models.<host>.yaml`
+
+The selected profile is validated as a whole and never merged with another. An invalid repository profile blocks delegation rather than falling through to the global one. Ask `setup-agent-mode` for the `global` scope to install shared files and a personal profile under `~/.agents/agent-mode` without touching any repository. A global profile exists only on that machine, so cloud environments see it only when their home directory has it. Commit a project profile when cloud runs must share the routing. Each environment validates the selected profile against its live host capabilities before delegating.
 
 To install every skill in the current project for both Codex and Claude Code without prompts, run:
 
