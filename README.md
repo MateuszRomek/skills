@@ -99,6 +99,7 @@ The collection includes:
 - verification and review workflows such as `create-verification-skill`, `interrogate`, `swarm`, `blast-radius`, and `benchmark-checklist`;
 - `correct`, which turns repeated agent mistakes into architecture, types, and checks;
 - planning skills adapted from Matt Pocock's collection, including `grilling`, `domain-modeling`, `wayfinder`, `to-spec`, and `to-tickets`;
+- `fast-track`, which runs `wayfinder`, `to-spec`, and `to-tickets` as one run where the agent makes the reversible decisions, asks only about one-way doors, and ends with a decision report;
 - local delivery skills such as `prepare-pull-request` and `merge-when-ci-passes`;
 - reusable engineering principles under `principle-*`;
 - marketing writing skills `copywriting` and `copy-editing`, adapted from [Corey Haines's marketingskills](https://github.com/coreyhaines31/marketingskills).
