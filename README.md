@@ -6,125 +6,164 @@ Agent Mode is heavily inspired by [pstack](https://github.com/cursor/plugins/tre
 
 Lauren also wrote an excellent [guide to pstack](https://x.com/poteto/status/2094457600259842065). I recommend reading it to understand the ideas behind this workflow.
 
-## Supported hosts
+## Quick start
 
-The skills are host-neutral and are used daily in both Codex and Claude Code:
+1. Install the skills in your project:
 
-| Host | Install target | Invoke a skill | Model profile |
-| --- | --- | --- | --- |
-| Codex | `--agent codex` | `$skill-name` | `.agents/agent-mode/models.codex.yaml` |
-| Claude Code | `--agent claude-code` | `/skill-name` | `.agents/agent-mode/models.claude-code.yaml` |
+   ```bash
+   npx skills add MateuszRomek/skills
+   ```
 
-Antigravity is also recognized by Agent mode, and the [`skills` CLI](https://github.com/vercel-labs/skills) can install the collection into Cursor and other agents. Host-specific behavior such as delegation, structured questions, and model selection is resolved at runtime through [`HOST-COMPATIBILITY.md`](.agents/agent-mode/HOST-COMPATIBILITY.md), so a skill never assumes one host's tools.
+   The installer asks which skills and which agents you want.
 
-## Install
+2. Open your project in your coding agent and run both setup skills once:
 
-Use the interactive installer to choose skills and agents:
+   | Host | Run |
+   | --- | --- |
+   | Claude Code | `/setup-agent-mode`, then `/setup-engineering-workspace` |
+   | Codex | `$setup-agent-mode`, then `$setup-engineering-workspace` |
 
-```bash
-npx skills add MateuszRomek/skills
-```
+3. Commit the files the setup skills created, so teammates and cloud environments get the same configuration.
 
-After installation, invoke these setup skills once in each project:
+4. Start working with `/agent-mode` (or `$agent-mode` in Codex) and describe your task.
+
+## The setup skills
+
+Both setup skills are interactive. They look at your project, ask a few short questions, show you what they plan to write, and write files only after you confirm. You can run them again at any time to change your answers.
+
+### `setup-agent-mode`: choose which models do the work
+
+**Use case:** Many skills split work across subagents, for example several reviewers checking a change or several competing designs in `arena`. This skill decides which model and reasoning effort each of those jobs uses, and how many subagents may run.
+
+**What it does:**
+
+1. Copies the shared Agent Mode files into `.agents/agent-mode/`.
+2. Detects your host (Claude Code or Codex) and the models it can use.
+3. Asks what you care about: best quality, balanced, lowest cost, or speed. It also asks how you pay and which models you prefer or want to avoid.
+4. Researches the eligible models and recommends a model and effort for every role, with a cheaper and a stronger alternative.
+5. Proposes limits: total subagents per task, how many run at once, and how deep delegation may nest.
+6. Writes the profile you confirm and validates it.
+7. Optionally offers to create a project verification skill with `create-verification-skill`.
+
+**What it produces:**
 
 ```text
-$setup-agent-mode               # Codex
-/setup-agent-mode               # Claude Code
-$setup-engineering-workspace    # Codex
-/setup-engineering-workspace    # Claude Code
+.agents/agent-mode/
+  HOST-COMPATIBILITY.md     how skills adapt to each host
+  ROUTING.md                the list of roles that can be delegated
+  agents/                   shared agent definitions
+  models.claude-code.yaml   your profile for Claude Code
+  models.codex.yaml         your profile for Codex
 ```
 
-`setup-agent-mode` installs the shared files under `.agents/agent-mode` and configures project model routing for the active host. `setup-engineering-workspace` configures the issue tracker, triage labels, and domain documentation used by the planning skills.
+Each host gets its own `models.<host>.yaml`, so run the skill once in every host you use. A profile looks like this:
 
-Setup writes `.agents/agent-mode/models.<host>.yaml` by default, one profile per host. Run `setup-agent-mode` once in each host you use; a Codex profile and a Claude Code profile live side by side, and each host only reads its own. Commit and push this profile with your project so other checkouts, including cloud environments, receive the configured roles, model assignments, and delegation limits. Setup does not commit or push files itself.
-
-Skills use the first profile that exists, in this order.
-
-1. Repository `.agents/agent-mode/models.<host>.yaml`
-2. Global `~/.agents/agent-mode/models.<host>.yaml`
-
-The selected profile is validated as a whole and never merged with another. An invalid repository profile blocks delegation rather than falling through to the global one. Ask `setup-agent-mode` for the `global` scope to install shared files and a personal profile under `~/.agents/agent-mode` without touching any repository. A global profile exists only on that machine, so cloud environments see it only when their home directory has it. Commit a project profile when cloud runs must share the routing. Each environment validates the selected profile against its live host capabilities before delegating.
-
-To install every skill in the current project for both Codex and Claude Code without prompts, run:
-
-```bash
-npx skills add MateuszRomek/skills --agent codex claude-code --skill '*'
+```yaml
+version: 2
+host: codex
+intent:
+  optimization: "Quality with restrained usage"
+  budget: "none"
+delegation:
+  mode: enabled
+  max-workers-per-task: 8
+  max-concurrent-workers: 3
+  max-delegation-depth: 1
+roles:
+  feature:
+    execution: coordinator   # the main agent does this work itself
+  reviewer:
+    execution: workers       # this work goes to subagents
+    workers:
+      - model: <model-id>
+        reasoning: low
 ```
 
-To install every skill globally instead, add `--global`:
+**Good to know:**
 
-```bash
-npx skills add MateuszRomek/skills --global --agent codex claude-code --skill '*'
+- Without a valid profile, skills start no subagents. Work that the main agent can do still runs; workflows that need independent workers, such as `arena` and `interrogate`, report that they are unavailable.
+- Ask for the `global` scope to write a personal profile to `~/.agents/agent-mode/` instead. It applies to every repository on that machine that has no profile of its own. A repository profile always wins over the global one.
+- Setup never commits or pushes. Commit the project profile yourself.
+
+### `setup-engineering-workspace`: connect your issue tracker and docs
+
+**Use case:** The planning skills (`to-spec`, `to-tickets`, `triage`, `wayfinder`, and others) create and read issues and project documentation. This skill tells them where those live in your project.
+
+**What it does:**
+
+1. Checks your git remote, `CLAUDE.md` or `AGENTS.md`, and any existing `CONTEXT.md` or ADRs.
+2. Asks where you track issues: GitHub, GitLab, local markdown files under `.scratch/`, or another tool you describe (Jira, Linear, and so on).
+3. If the `triage` skill is installed, asks whether to keep the default triage labels: `needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, `wontfix`.
+4. Picks a domain documentation layout: one `CONTEXT.md` and `docs/adr/` at the root, or one `CONTEXT.md` per package in a monorepo.
+5. Shows you a draft and writes it after you confirm.
+
+**What it produces:**
+
+```text
+docs/agents/
+  issue-tracker.md    where issues live and how to create them
+  triage-labels.md    label names (only when triage is installed)
+  domain.md           where CONTEXT.md and ADRs live
+CLAUDE.md or AGENTS.md
+  a short "## Agent skills" section that points to the files above
 ```
 
-List a single agent after `--agent` to target only one host.
+You can edit these files directly later. Run the skill again only to switch issue trackers or start over.
 
-To inspect the available skills before installation, run:
+## Using Agent Mode
 
-```bash
-npx skills add MateuszRomek/skills --list
-```
-
-To update installed skills, run:
-
-```bash
-npx skills update
-```
-
-## Use Agent Mode
-
-`agent-mode` is the main router. It classifies the task, selects a playbook, loads the relevant engineering principles, and routes work to supporting skills.
-
-A typical feature can move through this sequence:
+`agent-mode` is the entry point. Describe your task, and it picks a playbook, loads the relevant engineering principles, and calls the right skills. A typical feature goes like this:
 
 ```text
 idea or specification
-  -> how
-  -> architect or arena when design choices remain
-  -> implementation in verified slices
-  -> interrogate for adversarial review when risk warrants it
-  -> prepare-pull-request after explicit approval
-  -> merge-when-ci-passes after explicit approval
+  -> how                    understand the existing code
+  -> architect or arena     compare designs, when choices remain
+  -> implementation         in small, verified slices
+  -> interrogate            adversarial review, when the risk warrants it
+  -> prepare-pull-request   only after you approve
+  -> merge-when-ci-passes   only after you approve
 ```
 
-The workflow keeps local implementation separate from delivery. A skill does not gain permission to commit, push, open a pull request, or merge only because it implemented or verified a change.
+Skills never commit, push, open a pull request, or merge unless you explicitly ask.
 
 ## What is included
 
-The collection includes:
+- **Main router:** `agent-mode` and its task playbooks.
+- **Understanding and design:** `how`, `why`, `architect`, `arena`, `research`.
+- **Planning** (adapted from Matt Pocock): `grilling`, `domain-modeling`, `wayfinder`, `to-spec`, `to-tickets`, `triage`.
+- **Implementation:** `implement-specification`, `tdd`.
+- **Verification and review:** `create-verification-skill`, `interrogate`, `swarm`, `blast-radius`, `benchmark-checklist`.
+- **Learning from mistakes:** `correct`, `reflect`.
+- **Delivery:** `prepare-pull-request`, `merge-when-ci-passes`, `resolving-merge-conflicts`.
+- **Engineering principles:** the `principle-*` skills.
+- **Writing:** `copywriting` and `copy-editing` (adapted from [Corey Haines's marketingskills](https://github.com/coreyhaines31/marketingskills)), `technical-writing`, `writing-for-agents`.
 
-- `agent-mode` and its task playbooks;
-- architecture and exploration skills such as `how`, `why`, `architect`, and `arena`;
-- implementation workflows such as `implement-specification` and `tdd`;
-- verification and review workflows such as `create-verification-skill`, `interrogate`, `swarm`, `blast-radius`, and `benchmark-checklist`;
-- `correct`, which turns repeated agent mistakes into architecture, types, and checks;
-- planning skills adapted from Matt Pocock's collection, including `grilling`, `domain-modeling`, `wayfinder`, `to-spec`, and `to-tickets`;
-- local delivery skills such as `prepare-pull-request` and `merge-when-ci-passes`;
-- reusable engineering principles under `principle-*`;
-- marketing writing skills `copywriting` and `copy-editing`, adapted from [Corey Haines's marketingskills](https://github.com/coreyhaines31/marketingskills).
+To see every skill before installing, run `npx skills add MateuszRomek/skills --list`.
 
-The repository intentionally excludes skills tied to a specific application library. For example, Better Auth skills should be installed from their upstream source in projects that use Better Auth.
+## More install options
 
-## Repository layout
+```bash
+# Install every skill for Claude Code and Codex without prompts
+npx skills add MateuszRomek/skills --agent codex claude-code --skill '*'
 
-```text
-.agents/
-  agent-mode/       Shared host compatibility and agent definitions
-  skills/           Flat collection of installable skills
-  LICENSES/         Original third-party license notices
-.claude/
-  skills -> ../.agents/skills
+# Same, but globally instead of in the current project
+npx skills add MateuszRomek/skills --global --agent codex claude-code --skill '*'
+
+# Update installed skills
+npx skills update
 ```
 
-Every installable skill lives at `.agents/skills/<skill-name>/SKILL.md`. The skill name in its frontmatter matches the directory name.
+The skills are used daily in Claude Code and Codex. The [`skills` CLI](https://github.com/vercel-labs/skills) can also install them into Cursor, Antigravity, and other agents. Host differences such as delegation, structured questions, and model selection are handled in [`HOST-COMPATIBILITY.md`](.agents/agent-mode/HOST-COMPATIBILITY.md).
 
-`.agents/skills` is the source of truth; edit skills there. To let Claude Code sessions opened in this repository see the same skills Codex does, create a local symlink:
+## Contributing
+
+Every skill lives at `.agents/skills/<skill-name>/SKILL.md`, and that folder is the source of truth. To make Claude Code sessions in this repository see the skills, create a local symlink:
 
 ```bash
 ln -s ../.agents/skills .claude/skills
 ```
 
-The symlink is gitignored. Committing it makes every skill match two paths, and `npx skills update` then skips them in consuming projects.
+The symlink is gitignored on purpose. Committing it makes `npx skills update` skip the skills in consuming projects.
 
 ## License
 
