@@ -25,7 +25,7 @@ Lauren also wrote an excellent [guide to pstack](https://x.com/poteto/status/209
 
 3. Commit the files the setup skills created, so teammates and cloud environments get the same configuration.
 
-4. Start working with `/agent-mode` (or `$agent-mode` in Codex) and describe your task.
+4. Describe your task. With the session hook on, the agent enters Agent Mode by itself for multi-file changes, design choices, unclear bugs, and performance work. You can still start it explicitly with `/agent-mode` (or `$agent-mode` in Codex).
 
 ## The setup skills
 
@@ -43,7 +43,8 @@ Both setup skills are interactive. They look at your project, ask a few short qu
 4. Researches the eligible models and recommends a model and effort for every role, with a cheaper and a stronger alternative.
 5. Proposes limits: total subagents per task, how many run at once, and how deep delegation may nest.
 6. Writes the profile you confirm and validates it.
-7. Optionally offers to create a project verification skill with `create-verification-skill`.
+7. Asks whether to install the session hook, which is on by default. The hook loads a short routing instruction at the start of every session and again after compaction, so you do not invoke `agent-mode` on every prompt. Codex runs the hook only after you approve it in `/hooks`.
+8. Optionally offers to create a project verification skill with `create-verification-skill`.
 
 **What it produces:**
 
@@ -52,6 +53,7 @@ Both setup skills are interactive. They look at your project, ask a few short qu
   HOST-COMPATIBILITY.md     how skills adapt to each host
   ROUTING.md                the list of roles that can be delegated
   agents/                   shared agent definitions
+  session-start.md          routing instruction the session hook prints
   models.claude-code.yaml   your profile for Claude Code
   models.codex.yaml         your profile for Codex
 ```

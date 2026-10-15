@@ -1,6 +1,6 @@
 ---
 name: setup-agent-mode
-description: "Advise on and configure Agent mode model routing: interview model preferences, research current model docs and pricing, recommend the right model and reasoning effort for each role, then write the delegation profile. Use for /setup-agent-mode, configure agent mode, choosing models for agent roles, or changing its execution profile."
+description: "Advise on and configure Agent mode model routing: interview model preferences, research current model docs and pricing, recommend the right model and reasoning effort for each role, then write the delegation profile and the session routing hook. Use for /setup-agent-mode, configure agent mode, choosing models for agent roles, changing its execution profile, or turning automatic Agent mode routing on or off."
 ---
 
 # Setup Agent mode
@@ -15,7 +15,7 @@ Read [`assets/agent-mode/HOST-COMPATIBILITY.md`](assets/agent-mode/HOST-COMPATIB
 
 For the `global` scope, leave the repository untouched. Otherwise keep `.agents/agent-mode/models.<host>.yaml` trackable by git. If an ignore rule covers it, narrow that rule or add a profile-specific exception. Do not change unrelated ignore rules.
 
-Complete this step when the destination's `HOST-COMPATIBILITY.md`, `ROUTING.md`, and both files under `agents` match the packaged assets.
+Complete this step when the destination's `HOST-COMPATIBILITY.md`, `ROUTING.md`, `session-start.md`, and both files under `agents` match the packaged assets.
 
 ### 2. Detect the host and available models
 
@@ -108,10 +108,23 @@ roles:
 
 The angle-bracketed values describe the schema. Replace them with user-confirmed, host-validated values. Quote intent strings when YAML could interpret them as another type. Include every role listed in `ROUTING.md` when delegation is enabled. A `coordinator` route has no `workers`. A `workers` route has a non-empty roster, and that list is the complete configured capacity for one invocation of the role. To disable all delegation, keep `intent`, write only `mode: disabled` inside `delegation`, and omit `roles` and all limits. Do not maintain another role list here.
 
-### 9. Confirm
+### 9. Route sessions into Agent mode
 
-Show the host, delegation mode, optimization goal, budget or cost posture, total task worker limit, concurrency limit, delegation depth, file path, coordinator roles, explicit worker rosters, intentionally inherited entries, and any unavailable combinations rejected during setup. Run `python3 <skill-dir>/scripts/select-profile.py <host>` from the repository and report the scope and path it prints. Say whether a higher-precedence profile masks the one just written. Re-running this skill updates only the selected scope for the current host. A project profile is ready for the user's commit and push; setup itself does not stage, commit, or push it. A global profile stays on this machine, so cloud environments do not receive it.
+Ask whether every new session should load the Agent mode routing instruction. The default is on. A `SessionStart` hook prints `session-start.md` from the shared files on startup, resume, clear, and compact, so the user does not invoke `agent-mode` on every prompt. The hook reads the file on each run, so a refreshed `session-start.md` takes effect without touching the hook.
 
-### 10. Offer a verification skill (optional)
+Run `python3 <skill-dir>/scripts/session-hook.py <host> <scope> <on|off>` from the repository, with the same scope as the profile. It merges one hook entry into the host's settings file and keeps every other hook. Reruns replace that entry instead of adding another. It supports these hosts:
+
+| Host | `repo` scope | `global` scope |
+| --- | --- | --- |
+| `claude-code` | `.claude/settings.json` | `$CLAUDE_CONFIG_DIR/settings.json`, or `~/.claude/settings.json` |
+| `codex` | `.codex/hooks.json` | `$CODEX_HOME/hooks.json`, or `~/.codex/hooks.json` |
+
+Codex runs a new or changed hook only after the user approves it in `/hooks`. Tell the user to open `/hooks` in Codex and approve the Agent mode entry. If a `repo` hook is missing from `/hooks`, the user marks the project trusted in Codex first. Codex keeps the approval while the hook command is unchanged, so editing `session-start.md` needs no new approval. For any other host, report that it has no supported hook and offer to add the contents of `session-start.md` to the host's standing instruction file instead.
+
+### 10. Confirm
+
+Show the host, delegation mode, optimization goal, budget or cost posture, total task worker limit, concurrency limit, delegation depth, file path, coordinator roles, explicit worker rosters, intentionally inherited entries, any unavailable combinations rejected during setup, and the session hook state with the settings file it changed. Run `python3 <skill-dir>/scripts/select-profile.py <host>` from the repository and report the scope and path it prints. Say whether a higher-precedence profile masks the one just written. Re-running this skill updates only the selected scope for the current host. A project profile is ready for the user's commit and push; setup itself does not stage, commit, or push it. A global profile stays on this machine, so cloud environments do not receive it.
+
+### 11. Offer a verification skill (optional)
 
 Check whether the project has a way to drive the real app for proof (a `verify-*` skill, or an existing harness). If not, offer once: "want a project-local verification skill, so agents can drive the app the way a user does and prove changes work? I can generate one with /create-verification-skill." On yes, invoke `/create-verification-skill` from its installed location. On no, move on without pushing.
