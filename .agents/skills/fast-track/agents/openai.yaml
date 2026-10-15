@@ -1,0 +1,5 @@
+interface:
+  display_name: "Fast Track"
+  short_description: "Idea to spec and tickets, agent decides"
+policy:
+  allow_implicit_invocation: false

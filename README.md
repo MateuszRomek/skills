@@ -131,6 +131,7 @@ Skills never commit, push, open a pull request, or merge unless you explicitly a
 - **Main router:** `agent-mode` and its task playbooks.
 - **Understanding and design:** `how`, `why`, `architect`, `arena`, `research`.
 - **Planning** (adapted from Matt Pocock): `grilling`, `domain-modeling`, `wayfinder`, `to-spec`, `to-tickets`, `triage`.
+- **Fast planning:** `fast-track`, the planning pipeline in one run that asks only about one-way doors.
 - **Implementation:** `implement-specification`, `tdd`.
 - **Verification and review:** `create-verification-skill`, `interrogate`, `swarm`, `blast-radius`, `benchmark-checklist`.
 - **Learning from mistakes:** `correct`, `reflect`.
