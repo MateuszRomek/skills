@@ -56,6 +56,24 @@ class SessionHookTests(unittest.TestCase):
                 run(root, host, scope, "off")
                 self.assertEqual(json.loads(path.read_text()), FOREIGN)
 
+    def test_claude_code_also_gets_the_reminder_hooks_and_codex_does_not(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            run(root, "claude-code", "global", "on")
+            run(root, "claude-code", "global", "on")
+            hooks = json.loads((root / "home/.claude/settings.json").read_text())["hooks"]
+            self.assertEqual(len(hooks["UserPromptSubmit"]), 1)
+            self.assertEqual(hooks["PostToolUse"][0]["matcher"], "Skill")
+            self.assertIn("/home/.agents/agent-mode/hooks/agent-mode-reminder.sh", hooks["UserPromptSubmit"][0]["hooks"][0]["command"])
+            self.assertIn("/home/.agents/agent-mode/hooks/agent-mode-mark.sh", hooks["PostToolUse"][0]["hooks"][0]["command"])
+
+            run(root, "claude-code", "repo", "on")
+            repo_hooks = json.loads((root / "repo/.claude/settings.json").read_text())["hooks"]
+            self.assertIn('"$CLAUDE_PROJECT_DIR/.agents/agent-mode/hooks/agent-mode-reminder.sh"', repo_hooks["UserPromptSubmit"][0]["hooks"][0]["command"])
+
+            run(root, "codex", "global", "on")
+            self.assertEqual(set(json.loads((root / "home/.codex/hooks.json").read_text())["hooks"]), {"SessionStart"})
+
     def test_off_without_a_settings_file_creates_nothing(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
