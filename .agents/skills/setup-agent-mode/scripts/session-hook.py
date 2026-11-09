@@ -6,7 +6,18 @@ import os
 from pathlib import Path
 
 MARKER = ".agents/agent-mode/session-start.md"
+HOOKS_DIR = ".agents/agent-mode/hooks/"
 MATCHER = "startup|resume|clear|compact"
+CLAUDE_REMINDER = (
+    ("UserPromptSubmit", None, "agent-mode-reminder.sh"),
+    ("PostToolUse", "Skill", "agent-mode-mark.sh"),
+)
+
+
+def root_prefix(host: str, scope: str, home: Path) -> str:
+    if scope == "global":
+        return str(home)
+    return "$CLAUDE_PROJECT_DIR" if host == "claude-code" else "$(git rev-parse --show-toplevel)"
 
 
 def targets(repo: Path, home: Path) -> dict[tuple[str, str], tuple[Path, str]]:
@@ -33,30 +44,44 @@ def targets(repo: Path, home: Path) -> dict[tuple[str, str], tuple[Path, str]]:
 
 
 def owned(hook: dict) -> bool:
-    return MARKER in hook.get("command", "")
+    command = hook.get("command", "")
+    return MARKER in command or HOOKS_DIR in command
 
 
-def apply(settings: dict, command: str, enabled: bool) -> dict:
-    hooks = settings.setdefault("hooks", {})
+def replace_owned(hooks: dict, event: str, entry: dict | None) -> None:
     groups = []
-    for group in hooks.get("SessionStart", []):
+    for group in hooks.get(event, []):
         kept = [hook for hook in group.get("hooks", []) if not owned(hook)]
         if kept:
             groups.append({**group, "hooks": kept})
-    if enabled:
-        groups.append(
-            {
-                "matcher": MATCHER,
-                "hooks": [{"type": "command", "command": f"{command} 2>/dev/null || true"}],
-            }
-        )
+    if entry:
+        groups.append(entry)
     if groups:
-        hooks["SessionStart"] = groups
+        hooks[event] = groups
     else:
-        hooks.pop("SessionStart", None)
+        hooks.pop(event, None)
+
+
+def entry(matcher: str | None, command: str, **extra) -> dict:
+    group = {"matcher": matcher} if matcher else {}
+    return {**group, "hooks": [{"type": "command", "command": command, **extra}]}
+
+
+def apply(settings: dict, command: str, enabled: bool, reminder: list[tuple[str, str | None, str]] = ()) -> dict:
+    hooks = settings.setdefault("hooks", {})
+    replace_owned(hooks, "SessionStart", entry(MATCHER, f"{command} 2>/dev/null || true") if enabled else None)
+    for event, matcher, script in reminder:
+        replace_owned(hooks, event, entry(matcher, script, timeout=5) if enabled else None)
     if not hooks:
         settings.pop("hooks")
     return settings
+
+
+def reminder_hooks(host: str, scope: str, home: Path) -> list[tuple[str, str | None, str]]:
+    if host != "claude-code":
+        return []
+    prefix = root_prefix(host, scope, home)
+    return [(event, matcher, f'"{prefix}/{HOOKS_DIR}{script}"') for event, matcher, script in CLAUDE_REMINDER]
 
 
 def main() -> None:
@@ -70,7 +95,7 @@ def main() -> None:
 
     path, command = targets(args.repo, args.home)[(args.host, args.scope)]
     settings = json.loads(path.read_text()) if path.is_file() else {}
-    updated = apply(settings, command, args.state == "on")
+    updated = apply(settings, command, args.state == "on", reminder_hooks(args.host, args.scope, args.home))
     if not updated and not path.is_file():
         print(f"{args.state}: {path} (unchanged)")
         return

@@ -7,3 +7,5 @@ is_background: true
 # Agent mode subagent
 
 You are operating under the full `agent-mode` workflow. Read the `agent-mode` skill's `SKILL.md` in full before doing any work, including its inline Principles index. Navigate to a leaf `principle-*` skill whenever you apply that principle.
+
+When a fix satisfies a lint or type check only by imitating a pattern's shape (a subscription that never notifies, state that mirrors another source), stop and model the real data source instead.

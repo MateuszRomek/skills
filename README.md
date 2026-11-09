@@ -8,22 +8,24 @@ Lauren also wrote an excellent [guide to pstack](https://x.com/poteto/status/209
 
 ## Quick start
 
-1. Install the skills in your project:
+1. Install the skills once for your user, so every repository gets the same set:
 
    ```bash
-   npx skills add MateuszRomek/skills
+   npx skills add MateuszRomek/skills -g
    ```
 
    The installer asks which skills and which agents you want.
 
-2. Open your project in your coding agent and run both setup skills once:
+2. Run `setup-agent-mode` once in each host you use and pick the `global` scope. It writes the routing profile and the host setup to your home directory.
 
    | Host | Run |
    | --- | --- |
-   | Claude Code | `/setup-agent-mode`, then `/setup-engineering-workspace` |
-   | Codex | `$setup-agent-mode`, then `$setup-engineering-workspace` |
+   | Claude Code | `/setup-agent-mode` |
+   | Codex | `$setup-agent-mode` |
 
-3. Commit the files the setup skills created, so teammates and cloud environments get the same configuration.
+3. In each project, run `setup-engineering-workspace` (`/setup-engineering-workspace` or `$setup-engineering-workspace`) and commit what it writes. A project keeps only what is specific to it: the issue tracker notes and its verification skills, such as one made with `create-verification-skill`.
+
+   Use the project scope of `setup-agent-mode` and a project install of the skills only when teammates or cloud environments must get the same configuration from the repository.
 
 4. Describe your task. With the session hook on, the agent enters Agent Mode by itself for multi-file changes, design choices, unclear bugs, and performance work. You can still start it explicitly with `/agent-mode` (or `$agent-mode` in Codex).
 
@@ -37,22 +39,24 @@ Both setup skills are interactive. They look at your project, ask a few short qu
 
 **What it does:**
 
-1. Copies the shared Agent Mode files into `.agents/agent-mode/`.
+1. Asks for the scope, `global` or `repo`, and sets up everything in that scope only. It installs the skills if they are missing and copies the shared Agent Mode files into `~/.agents/agent-mode/` (global) or `.agents/agent-mode/` (repo).
 2. Detects your host (Claude Code or Codex) and the models it can use.
 3. Asks what you care about: best quality, balanced, lowest cost, or speed. It also asks how you pay and which models you prefer or want to avoid.
 4. Researches the eligible models and recommends a model and effort for every role, with a cheaper and a stronger alternative.
 5. Proposes limits: total subagents per task, how many run at once, and how deep delegation may nest.
 6. Writes the profile you confirm and validates it.
-7. Asks whether to install the session hook, which is on by default. The hook loads a short routing instruction at the start of every session and again after compaction, so you do not invoke `agent-mode` on every prompt. Codex runs the hook only after you approve it in `/hooks`.
-8. Optionally offers to create a project verification skill with `create-verification-skill`.
+7. In Claude Code, writes one subagent per model and effort pair the profile uses (`am-opus-high`, for example), because the delegation tool cannot set the effort on its own.
+8. Asks whether to install the session hook, which is on by default. The hook loads a short routing instruction at the start of every session and again after compaction, so you do not invoke `agent-mode` on every prompt. In Claude Code it also adds a reminder that keeps the session on the `agent-mode` skill after you enter it. Codex runs the hook only after you approve it in `/hooks`.
+9. Optionally offers to create a project verification skill with `create-verification-skill`.
 
 **What it produces:**
 
 ```text
-.agents/agent-mode/
+~/.agents/agent-mode/       or .agents/agent-mode/ for the project scope
   HOST-COMPATIBILITY.md     how skills adapt to each host
   ROUTING.md                the list of roles that can be delegated
   agents/                   shared agent definitions
+  hooks/                    Claude Code reminder hooks
   session-start.md          routing instruction the session hook prints
   models.claude-code.yaml   your profile for Claude Code
   models.codex.yaml         your profile for Codex
