@@ -39,7 +39,7 @@ Both setup skills are interactive. They look at your project, ask a few short qu
 
 **What it does:**
 
-1. Asks for the scope and copies the shared Agent Mode files into `~/.agents/agent-mode/` (global) or `.agents/agent-mode/` (project).
+1. Asks for the scope, `global` or `repo`, and sets up everything in that scope only. It installs the skills if they are missing and copies the shared Agent Mode files into `~/.agents/agent-mode/` (global) or `.agents/agent-mode/` (repo).
 2. Detects your host (Claude Code or Codex) and the models it can use.
 3. Asks what you care about: best quality, balanced, lowest cost, or speed. It also asks how you pay and which models you prefer or want to avoid.
 4. Researches the eligible models and recommends a model and effort for every role, with a cheaper and a stronger alternative.
