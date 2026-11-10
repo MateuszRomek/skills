@@ -135,11 +135,14 @@ Skills never commit, push, open a pull request, or merge unless you explicitly a
 ## What is included
 
 - **Main router:** `agent-mode` and its task playbooks.
-- **Understanding and design:** `how`, `why`, `architect`, `arena`, `research`.
+- **Understanding and design:** `in-your-own-words`, `how`, `why`, `architect`, `arena`, `research`.
 - **Planning** (adapted from Matt Pocock): `grilling`, `domain-modeling`, `wayfinder`, `to-spec`, `to-tickets`, `triage`.
+- **Multi-PR plans:** the `agent-mode` multi-phase plan playbook, a checklist per PR with a check script.
 - **Fast planning:** `fast-track`, the planning pipeline in one run that asks only about one-way doors.
 - **Implementation:** `implement-specification`, `tdd`.
 - **Verification and review:** `create-verification-skill`, `interrogate`, `swarm`, `blast-radius`, `benchmark-checklist`.
+- **Formal verification:** `create-formal-verification-skill`, `maintain-formal-verification-skill`, `statechart`.
+- **Catching up:** `ketchup`, `ketchup-video`.
 - **Learning from mistakes:** `correct`, `reflect`.
 - **Delivery:** `prepare-pull-request`, `merge-when-ci-passes`, `resolving-merge-conflicts`.
 - **Engineering principles:** the `principle-*` skills.
