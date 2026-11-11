@@ -14,7 +14,7 @@ const rule =
 const validPlan = `# Demo
 
 ## How to read this
-One box is one unit of work and names the evidence. Check a box only when its evidence exists. It runs through implement-specification.
+One box is one unit of work and names the evidence. Check a box only when its evidence exists. It runs through orchestrate.
 ${rule}
 
 ## Program checklist

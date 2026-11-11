@@ -7,7 +7,6 @@ delegation:
   mode: enabled
   max-workers-per-task: 8
   max-concurrent-workers: 3
-  max-delegation-depth: 1
 roles:
   feature:
     execution: coordinator

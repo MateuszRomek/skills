@@ -74,7 +74,6 @@ delegation:
   mode: enabled
   max-workers-per-task: 8
   max-concurrent-workers: 3
-  max-delegation-depth: 1
 roles:
   feature:
     execution: coordinator   # the main agent does this work itself
@@ -139,7 +138,7 @@ Skills never commit, push, open a pull request, or merge unless you explicitly a
 - **Planning** (adapted from Matt Pocock): `grilling`, `domain-modeling`, `wayfinder`, `to-spec`, `to-tickets`, `triage`.
 - **Multi-PR plans:** the `agent-mode` multi-phase plan playbook, a checklist per PR with a check script.
 - **Fast planning:** `fast-track`, the planning pipeline in one run that asks only about one-way doors.
-- **Implementation:** `implement-specification`, `tdd`.
+- **Implementation:** `orchestrate`, one coordinator chat that takes issues, a specification, or a multi-PR plan to merged pull requests through Agent mode workers, and `tdd`.
 - **Verification and review:** `create-verification-skill`, `interrogate`, `swarm`, `blast-radius`, `benchmark-checklist`.
 - **Formal verification:** `create-formal-verification-skill`, `maintain-formal-verification-skill`, `statechart`.
 - **Catching up:** `ketchup`, `ketchup-video`.

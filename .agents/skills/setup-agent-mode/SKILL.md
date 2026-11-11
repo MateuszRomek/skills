@@ -90,7 +90,6 @@ Recommend the delegation limits with it:
 
 - the maximum total number of subagent starts in one top-level task, including every nested workflow;
 - the maximum number of concurrently active subagents in that task;
-- the maximum delegation depth, where `1` allows only root-owned starts and `unlimited` leaves depth unrestricted;
 - the roster length of every `workers` route, and any host-supported per-worker budget controls.
 
 Show the write scope and path and mark stale identifiers. Ask the user to confirm or revise the complete profile. Recommendations are proposals, not defaults. Write no limit, roster, model, effort, inheritance, or coordinator route until the user confirms it. `inherit-parent` is valid only when the user explicitly selects it for that roster entry.
@@ -113,7 +112,6 @@ delegation:
   mode: enabled
   max-workers-per-task: <confirmed-positive-integer-or-unlimited>
   max-concurrent-workers: <confirmed-positive-integer-or-host-limit>
-  max-delegation-depth: <confirmed-positive-integer-or-unlimited>
 roles:
   feature:
     execution: coordinator
@@ -145,7 +143,7 @@ Codex runs a new or changed hook only after the user approves it in `/hooks`. Te
 
 ### 13. Confirm
 
-Show the host, delegation mode, optimization goal, budget or cost posture, total task worker limit, concurrency limit, delegation depth, file path, coordinator roles, explicit worker rosters, intentionally inherited entries, any unavailable combinations rejected during setup, and the Claude Code worker agents written in step 11, and the session hook state with the settings file it changed. Then list every row of the scope table with its path and state for the chosen scope. Run `python3 <skill-dir>/scripts/select-profile.py <host>` from the repository and report the scope and path it prints. Say whether a higher-precedence profile masks the one just written. Re-running this skill updates only the selected scope for the current host. A project profile is ready for the user's commit and push; setup itself does not stage, commit, or push it. A global profile stays on this machine, so cloud environments do not receive it.
+Show the host, delegation mode, optimization goal, budget or cost posture, total task worker limit, concurrency limit, file path, coordinator roles, explicit worker rosters, intentionally inherited entries, any unavailable combinations rejected during setup, and the Claude Code worker agents written in step 11, and the session hook state with the settings file it changed. Then list every row of the scope table with its path and state for the chosen scope. Run `python3 <skill-dir>/scripts/select-profile.py <host>` from the repository and report the scope and path it prints. Say whether a higher-precedence profile masks the one just written. Re-running this skill updates only the selected scope for the current host. A project profile is ready for the user's commit and push; setup itself does not stage, commit, or push it. A global profile stays on this machine, so cloud environments do not receive it.
 
 Complete this step when every row is installed, or marked not applicable with its reason, such as the workers row on a host other than Claude Code.
 

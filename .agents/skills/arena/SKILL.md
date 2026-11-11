@@ -29,7 +29,7 @@ Every configured candidate receives the same prompt, so the prompt is the contra
 
 ## Phase B: Fan out
 
-The current coordinator dispatches `arena-runners` within its configured depth and reserved task budget. Give each resolved worker the task, the path to shared grounding, its own output path, and instructions to produce both the artifact and a short rationale. Include any descendant budget reserved for that worker.
+The current coordinator dispatches `arena-runners` within its reserved task budget. Give each resolved worker the task, the path to shared grounding, its own output path, and instructions to produce both the artifact and a short rationale. Include any descendant budget reserved for that worker.
 
 The rationale is mandatory. Without it, the parent cannot tell whether a candidate's structure is principled or accidental, which makes Phase E grafting unreliable. Each rationale names the alternatives the candidate considered and what it rejected.
 

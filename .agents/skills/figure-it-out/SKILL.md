@@ -7,7 +7,7 @@ description: "Design an auditable playbook when no narrower one fits: a large mi
 
 When the task matches no playbook, design one. The deliverable before any code is the workflow itself: a sequence of phases that scales rigor to the task, runs the scientific method, and leaves a decision trail a human can audit after stepping away. Bias toward more rigor. The cost of building the wrong thing dwarfs the cost of being careful.
 
-Don't reinvent a playbook you already have. A focused single-unit task that matches Bug fix, Perf, Feature, Visual parity, or Eval routes there. A completed specification with multiple reviewable implementation slices routes to **implement-specification**. A large or cross-cutting task without a settled specification, or work the user reviews after stepping away, belongs here even when a single-unit version would be a Feature. The rigor and the audit trail are the point.
+Don't reinvent a playbook you already have. A focused single-unit task that matches Bug fix, Perf, Feature, Visual parity, or Eval routes there. A completed specification, a multi-PR plan, or a set of issues to deliver routes to **orchestrate**. A large or cross-cutting task without a settled specification, or work the user reviews after stepping away, belongs here even when a single-unit version would be a Feature. The rigor and the audit trail are the point.
 
 ## Start
 

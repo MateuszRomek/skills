@@ -73,4 +73,4 @@ Run the transcript audit from the **show-me-your-work** skill, then reply with t
 
 A veto from the user is a change to the spec and the affected tickets. Apply it, log it, and re-report only what changed.
 
-Stop after the report. When the user's invocation also asked to build, continue with the **implement-specification** skill on the published spec.
+Stop after the report. When the user's invocation also asked to build, continue with the **orchestrate** skill on the published tickets.

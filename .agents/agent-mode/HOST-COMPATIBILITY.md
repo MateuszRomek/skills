@@ -28,7 +28,7 @@ Use structured questions when the host provides them. Otherwise ask one concise 
 
 ## Delegation
 
-The root coordinator owns the initial task budget. Any agent may delegate while its depth and assigned budget allow it. The root is depth 0; a child is one level deeper than its parent. `delegation.max-delegation-depth: 1` therefore allows only root-owned starts, while a larger value or `unlimited` permits nested delegation.
+The root coordinator owns the initial task budget. Any agent may delegate while its assigned budget allows it. The host's own nesting limit is the only depth limit. An agent the host denies delegation follows the role's configured coordinator behavior.
 
 For a finite `delegation.max-workers-per-task`, a parent spends one start credit on the child and may reserve additional credits for that child's descendants. It subtracts the complete reservation before starting the child. The child may spend only its reserved credits and reports consumed and unused credits when it completes. The parent restores only the unused amount. Separate reservations prevent sibling branches from spending the same task budget. Retries consume credits too. Apply the same reservation rule to a finite concurrency limit when the host does not enforce one task-wide limit. Treat `unlimited` and `host-limit` as the user's explicit choices, not missing values.
 
@@ -69,13 +69,12 @@ Delegation: <enabled-or-disabled>
 Task worker limit: <configured-limit>
 Workers already started: <count>
 Concurrency: configured <count-or-host-limit>; effective <count>
-Delegation depth: <configured-depth>
 Routes: <role = configured-capacity -> resolved-starts>
 Task override: <explicit-user-override-or-none>
 Unavailable: <none-or-reasons>
 ```
 
-Replace every placeholder with resolved values and include any reserved descendant budgets in `Routes`. Emit the preflight once before the first possible worker start. Nested workflows reuse the profile and receive their current depth plus remaining budget in their task brief. When configuration is unavailable, say so and create no workers.
+Replace every placeholder with resolved values and include any reserved descendant budgets in `Routes`. Emit the preflight once before the first possible worker start. Nested workflows reuse the profile and receive their remaining budget in their task brief. When configuration is unavailable, say so and create no workers.
 
 ## Conversation history
 
