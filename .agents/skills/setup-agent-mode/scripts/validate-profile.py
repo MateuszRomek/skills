@@ -163,11 +163,12 @@ def main() -> None:
         return
     if mode != "enabled":
         fail("delegation.mode must be enabled or disabled")
+    if "max-delegation-depth" in profile.delegation:
+        fail("max-delegation-depth is no longer supported; rerun setup-agent-mode")
     if set(profile.delegation) != {
         "mode",
         "max-workers-per-task",
         "max-concurrent-workers",
-        "max-delegation-depth",
     }:
         fail("enabled delegation must define exactly all delegation limits")
 
@@ -180,11 +181,6 @@ def main() -> None:
         profile.delegation.get("max-concurrent-workers"),
         "host-limit",
         "max-concurrent-workers",
-    )
-    positive_integer_or(
-        profile.delegation.get("max-delegation-depth"),
-        "unlimited",
-        "max-delegation-depth",
     )
 
     for role, route in profile.roles.items():

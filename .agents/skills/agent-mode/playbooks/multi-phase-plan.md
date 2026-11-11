@@ -5,10 +5,10 @@
 1. When the change is one or two files with an obvious approach, skip the plan. Say so and stop.
 2. Settle open questions by prototype before you write. Run `playbooks/prototype.md` for each. Keep the branch, the SHA, and the screenshots for Appendix A. Ask the user only about a product or preference call that no run can settle. Give options (the **never-block-on-the-human** principle skill).
 3. Explore by dispatching `how-explorer` through [`HOST-COMPATIBILITY.md`](../../../agent-mode/HOST-COMPATIBILITY.md) (the **guard-the-context-window** principle skill). Each unit returns file pointers, conventions, test commands, and entry points. No inlined dumps.
-4. Copy the skeleton below into the plan file and fill every placeholder. Unless the user names a path, write the file to `docs/plans/<program-slug>.md`. Keep every heading and every sub-block in the order shown. One section per PR. One PR is one change with its own evidence (the **sequence-verifiable-units** principle skill). The plan runs through the **implement-specification** skill, so each PR section is one of its slices.
+4. Copy the skeleton below into the plan file and fill every placeholder. Unless the user names a path, write the file to `docs/plans/<program-slug>.md`. Keep every heading and every sub-block in the order shown. One section per PR. One PR is one change with its own evidence (the **sequence-verifiable-units** principle skill). The plan runs through the **orchestrate** skill, so each PR section is one of its tasks.
 5. Write under the **technical-writing** skill in full, then **unslop**. The body is one Diátaxis mode, how-to. Appendices hold explanation and reference. Each heading states the task or the finding. No long dashes. No mid-sentence colons.
 6. Run `node <agent-mode skill dir>/scripts/check-plan.mjs <plan.md>` and fix every line it prints (the **encode-lessons-in-structure** principle skill).
-7. Hand back. Post the plan path and the script's output, then stop. Execution starts on the user's explicit go, through **implement-specification**.
+7. Hand back. Post the plan path and the script's output, then stop. Execution starts on the user's explicit go, through **orchestrate**.
 
 **Verification.** Tests alone are not sufficient verification. A PR is verified only when its unit, live, and perf boxes are all checked (the **prove-it-works** principle skill). That sentence is the verification rule. Every verification block opens with it. The live block is mandatory. Ten lanes at the PR head drive the real surface through its control skill, per the **swarm** skill, dispatched as `swarm-worker`. Each lane is one box with a concrete scenario, the screenshot it saves, and its pass predicate. One lane is the **Regression lane against trunk.** It runs the same load-bearing scenario on trunk and head. If trunk does not have the feature, the lane records that fact and gates the behavior the diff adds plus the end state the user waits for instead of inventing a trunk result. The perf gate is dual-sided. Trunk and head must both produce the named metric. If trunk lacks the feature, also isolate the work the diff adds and set an absolute budget for that work plus the end-to-end state the user waits for. Do not claim a ratio between unlike scenarios. The perf block names the metric, the interleaved probe, the trunk baseline measured first, and the rule with the number that fails. A PR that changes an interaction is review-gated. The user reviews it in chat with screenshots and a video before merge. A PR that changes no interaction writes `**Review gate.** None. <PR id> is not review-gated.` and no boxes under it.
 
@@ -23,7 +23,7 @@
 
 One box is one unit of work. Every box names the evidence that checks it. A nested box is a sub-step of the box above it. Check a box only when its evidence exists, a file, a log line, a screenshot, a test run, or a SHA. The body is a how-to. The appendices explain and record.
 
-The program runs through the implement-specification skill. <Who merges, and which PR ids stop at review for the user.>
+The program runs through the orchestrate skill. <Who merges, and which PR ids stop at review for the user.>
 
 Tests alone are not sufficient verification. A PR is verified only when its unit, live, and perf boxes are all checked.
 
@@ -33,7 +33,7 @@ Tests alone are not sufficient verification. A PR is verified only when its unit
 
 - [ ] State this plan to the user, then stop. Start execution only on the user's explicit go.
 - [ ] Read these skills from the working tree at program start.
-  - [ ] implement-specification
+  - [ ] orchestrate
   - [ ] swarm
   - [ ] <control skill>
   - [ ] prepare-pull-request
@@ -44,7 +44,7 @@ Tests alone are not sufficient verification. A PR is verified only when its unit
 
 ### Dispatch slices
 
-- [ ] Dispatch each slice as `feature` with the full lifecycle implement-specification names.
+- [ ] Dispatch each slice as `feature` with the worker brief orchestrate names.
 - [ ] Follow this dependency graph. Start a dependent slice only on a verified parent.
   - [ ] <PR id> and <PR id> are independent and first. Both branch from `main`.
   - [ ] <PR id> after <PR id>.
@@ -133,7 +133,7 @@ Each live lane runs in its own worktree at the PR head. Drive the surface throug
 ## Close the program
 
 - [ ] Every box above is checked with its evidence.
-- [ ] Reply to the user with the report implement-specification names.
+- [ ] Reply to the user with the report orchestrate names.
 
 ## Appendix A. Prototype evidence
 

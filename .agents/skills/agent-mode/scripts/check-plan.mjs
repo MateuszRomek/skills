@@ -22,7 +22,7 @@ const HOW_TO_READ_MARKERS = [
 	"One box is one unit of work",
 	"names the evidence",
 	"Check a box only when its evidence exists",
-	"implement-specification",
+	"orchestrate",
 	RULE,
 ];
 const PERF_ITEMS = ["Metric.", "Probe.", "Baseline.", "Rule."];

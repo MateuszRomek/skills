@@ -24,6 +24,9 @@ Each role has a dispatch behavior. `partition` distributes distinct work units a
 | `bulk-reader` | partition | perform | Long transcripts, traces, feature corpora, or other large read-only artifacts. |
 | `comment-sicko` | replicate | perform | Comment review in `no-comments`. |
 | `reviewer` | replicate | unavailable | Independent review without a specialist review role. |
+| `verify-gates` | partition | perform | Re-running a PR's checks and project verification commands at one head SHA. |
+| `verify-live` | partition | perform | Driving the running app to prove a PR's done predicate at one head SHA. |
+| `verify-audit` | partition | perform | Auditing a PR's diff against its source for correctness and security at one head SHA. |
 | `how-explorer` | partition | perform | `how` source exploration. |
 | `how-explainer` | replicate | perform | `how` explanation and synthesis. |
 | `why-investigators` | partition | perform | `why` evidence-source investigation. |
@@ -41,4 +44,4 @@ Each role has a dispatch behavior. `partition` distributes distinct work units a
 
 ## Selection
 
-Use the narrowest matching role. A workflow submits semantic units for `partition` or one shared brief for `replicate`. The selected host profile is the only source of execution mode, worker roster, model, reasoning effort, task budget, concurrency, and delegation depth. A current-task override exists only when the user states it explicitly.
+Use the narrowest matching role. A workflow submits semantic units for `partition` or one shared brief for `replicate`. The selected host profile is the only source of execution mode, worker roster, model, reasoning effort, task budget, and concurrency. A current-task override exists only when the user states it explicitly.

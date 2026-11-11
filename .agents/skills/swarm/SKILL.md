@@ -25,7 +25,7 @@ Open a todolist with one entry per phase before launching anything.
 
 ## Phase B: Fan out
 
-The current coordinator schedules the resolved roster within its configured depth and reserved task budget. Use the current local workspace by default. Use a remote environment only when the user requests it or local execution cannot satisfy the task. Include any descendant budget reserved for each worker.
+The current coordinator schedules the resolved roster within its reserved task budget. Use the current local workspace by default. Use a remote environment only when the user requests it or local execution cannot satisfy the task. Include any descendant budget reserved for each worker.
 
 Every brief stands alone. Include the goal, scope, exact slice or race arm, how to verify, and what to report. Reports use `PASS`, `ISSUES`, or `BLOCKED` with evidence. A worker that can prove a defect reports `ISSUES` and lists every issue it can prove, not only the first.
 
