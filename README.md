@@ -139,7 +139,7 @@ Skills never commit, push, open a pull request, or merge unless you explicitly a
 - **Multi-PR plans:** the `agent-mode` multi-phase plan playbook, a checklist per PR with a check script.
 - **Fast planning:** `fast-track`, the planning pipeline in one run that asks only about one-way doors.
 - **Implementation:** `orchestrate`, one coordinator chat that takes issues, a specification, or a multi-PR plan to merged pull requests through Agent mode workers, and `tdd`.
-- **Verification and review:** `create-verification-skill`, `interrogate`, `swarm`, `blast-radius`, `benchmark-checklist`.
+- **Verification and review:** `create-verification-skill`, `interrogate`, `spec-standards-review` (adapted from Matt Pocock), `thermo-nuclear-code-quality-review` (from Cursor's team kit), `swarm`, `blast-radius`, `benchmark-checklist`.
 - **Formal verification:** `create-formal-verification-skill`, `maintain-formal-verification-skill`, `statechart`.
 - **Catching up:** `ketchup`, `ketchup-video`.
 - **Learning from mistakes:** `correct`, `reflect`.

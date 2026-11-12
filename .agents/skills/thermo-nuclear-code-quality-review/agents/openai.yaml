@@ -1,0 +1,6 @@
+interface:
+  display_name: "Thermo-Nuclear Code Quality Review"
+  short_description: "Run a strict maintainability review of a diff"
+  default_prompt: "Use $thermo-nuclear-code-quality-review on the current branch."
+policy:
+  allow_implicit_invocation: false

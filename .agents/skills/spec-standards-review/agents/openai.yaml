@@ -1,0 +1,3 @@
+interface:
+  display_name: "Spec and Standards Review"
+  short_description: "Review a diff on spec fit and repository standards"

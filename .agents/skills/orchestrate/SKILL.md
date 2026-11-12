@@ -35,14 +35,14 @@ any open state -> parked -> queued once the user unblocks it
 
 Invoking this skill with a delivery goal ("merged on main") is the user's explicit request for every PR and merge inside the program's task list. `program.md` records the merge policy the user chose: `merge` (default) or `stop-at-verified`, where you hand over verified green PRs and the user merges. The request covers nothing outside the task list.
 
-Stop and ask only at a **gate**: a schema migration, a public contract change, authentication or permissions, a product call the specification does not settle, an irreversible action, or a task parked after two failed attempts. `program.md` lists any extra gates the user named. Rebases, retries, flaky CI, review fixes, and "should I continue" are yours to settle (the **never-block-on-the-human** principle).
+Stop and ask only at a **gate**: a schema migration, a public contract change, authentication or permissions, a product call the specification does not settle, an irreversible action, a task parked after two failed attempts, or a task parked with its fix budget spent. `program.md` lists any extra gates the user named. Rebases, retries, flaky CI, review fixes, and "should I continue" are yours to settle (the **never-block-on-the-human** principle).
 
 ## 1. Open or resume the program
 
 Restate the user's goal in your own words.
 
 - **Resume** when `.orchestrate/<slug>/` exists. Read `program.md`, run `program.py show`, read the last rows of `decisions.tsv`. Reconcile every open task with live state: `gh pr view` and `gh pr checks` for its PR, `git branch -r` for its branch. Live state wins over the file. Record each correction as a decision row. Then continue at step 4.
-- **Create** otherwise. Add `.orchestrate/` to `.git/info/exclude` when it is missing there. Write `program.md` from the request: the goal, each task's source (issue number or spec section), each task's done predicate taken from its acceptance criteria, the merge policy, the user's rules (skills to use, screenshots, areas to avoid, verification rules), and extra gates. Inventory the repository's verification skills per [`references/verification.md`](references/verification.md). Start `decisions.tsv` from the header in the **show-me-your-work** skill's `references/decision-log-template.tsv`.
+- **Create** otherwise. Add `.orchestrate/` to `.git/info/exclude` when it is missing there. Write `program.md` from the request: the goal, the main SHA the program starts from, each task's source (issue number or spec section), each task's done predicate taken from its acceptance criteria, the merge policy, the user's rules (skills to use, screenshots, areas to avoid, verification rules, review skills the audit lane runs), and extra gates. Inventory the repository's verification skills per [`references/verification.md`](references/verification.md). Start `decisions.tsv` from the header in the **show-me-your-work** skill's `references/decision-log-template.tsv`.
 
 The step is complete when the program directory exists and every open task's row matches its live PR and branch.
 
@@ -74,12 +74,12 @@ Each wake (a worker report, a lane verdict, a user message) runs the same reconc
 **On lane verdicts.** Wait for every lane of the task. A verdict covers one head SHA.
 
 - Every lane `PASS` at the same head: record each verdict in `verdict`, then move to `merging`.
-- Any `ISSUES` with a proven defect: move to `building` and start a fresh worker with the consolidated scope plus every lane's blocking evidence. What blocks is defined in `references/verification.md`. Follow-ups go to `findings.md`.
+- Any `ISSUES`: triage per `references/verification.md` first. Non-blocking findings go to `findings.md`. With blocking findings left, move to `building` and start a fresh worker with the fix-round brief from `references/worker-brief.md`, then verify the fix with the fix-round lanes. When `program.py` refuses the move because the fix budget is spent, park the task instead.
 - `STALE`: the head moved. Reconcile the task with its live PR, then rerun the lanes at the new head.
 
 **Merge one PR at a time.** Merges are the one serialized step. Under `stop-at-verified`, stop at `merging` and list the PR for the user. Under `merge`:
 
-1. Fetch main. Ask whether what landed since the PR's base can affect it: a conflict, a file both sides changed, or changed code the PR calls. When it can, send a fresh worker to rebase and get checks green, then rerun the lanes the fix-round rule in `references/verification.md` names. When it cannot, merge without a rebase.
+1. Fetch main. Ask whether what landed since the PR's base can affect it: a conflict, a file both sides changed, or changed code the PR calls. When it can, send a fresh worker to rebase and get checks green, then rerun the lanes the rebase rule in `references/verification.md` names. When it cannot, merge without a rebase.
 2. Merge through the **merge-when-ci-passes** skill at the verified head. A code repair it would make goes to a fresh worker on that branch instead, so you never edit code.
 3. Move the task to `merged` and remove its worktree with `git worktree remove`. Run `program.py ready` again, because a merge can unblock dependents and leaves stacked children to restack.
 
@@ -95,7 +95,7 @@ The user may write at any time while workers run. Answer from the program direct
 
 ## 6. Close the program
 
-The program is settled when `program.py show` prints `program: settled`. Then follow the **ketchup** skill for the final report. It covers what merged with links, what is parked and why, problems found and how each was solved, the screenshots, and `findings.md` as proposed new issues. Create an issue only on the user's yes, through the tracker in `docs/agents/issue-tracker.md`.
+The program is settled when `program.py show` prints `program: settled`. When at least one task merged, run the **thermo-nuclear-code-quality-review** skill once, as one `verify-audit` unit, over the range from main at program start to the current main. Its findings never start a fix round. Add them to `findings.md` as candidate refactoring issues. Then follow the **ketchup** skill for the final report. It covers what merged with links, what is parked and why, problems found and how each was solved, the screenshots, and `findings.md` as proposed new issues, with the thermo-nuclear findings grouped as refactoring candidates. Create an issue only on the user's yes, through the tracker in `docs/agents/issue-tracker.md`.
 
 ## Reply
 
