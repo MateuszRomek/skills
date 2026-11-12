@@ -9,8 +9,9 @@ import tempfile
 from datetime import datetime, timezone
 from pathlib import Path
 
-COLUMNS = ["id", "title", "deps", "base", "level", "status", "attempts", "branch", "pr", "head", "verdict", "updated", "note"]
+COLUMNS = ["id", "title", "deps", "base", "level", "status", "attempts", "fixes", "max_fixes", "branch", "pr", "head", "verdict", "updated", "note"]
 FINAL = {"merged"}
+DEFAULTS = {"fixes": "0", "max_fixes": "1"}
 LEVELS = {"light", "standard", "behavioral", "security"}
 HAS_PR = {"verifying", "merging", "merged"}
 TRANSITIONS = {
@@ -21,7 +22,7 @@ TRANSITIONS = {
     "parked": {"queued"},
     "merged": set(),
 }
-EDITABLE = {"branch", "pr", "head", "verdict", "note", "title", "deps", "base", "level"}
+EDITABLE = {"branch", "pr", "head", "verdict", "note", "title", "deps", "base", "level", "max_fixes"}
 
 
 class ProgramError(Exception):
@@ -41,16 +42,18 @@ def load(program: Path) -> list[dict[str, str]]:
     if not path.exists():
         raise ProgramError(f"{path} does not exist; run init first")
     lines = path.read_text(encoding="utf-8").splitlines()
-    if not lines or lines[0].split("\t") != COLUMNS:
+    header = lines[0].split("\t") if lines else []
+    missing = [c for c in COLUMNS if c not in header]
+    if not header or set(missing) - set(DEFAULTS) or set(header) - set(COLUMNS):
         raise ProgramError(f"{path} header must be: {' '.join(COLUMNS)}")
     rows = []
     for number, line in enumerate(lines[1:], start=2):
         if not line.strip():
             continue
         cells = line.split("\t")
-        if len(cells) != len(COLUMNS):
-            raise ProgramError(f"{path}:{number} has {len(cells)} cells, expected {len(COLUMNS)}")
-        rows.append(dict(zip(COLUMNS, cells)))
+        if len(cells) != len(header):
+            raise ProgramError(f"{path}:{number} has {len(cells)} cells, expected {len(header)}")
+        rows.append({c: DEFAULTS[c] for c in missing} | dict(zip(header, cells)))
     return rows
 
 
@@ -80,6 +83,8 @@ def validate(rows: list[dict[str, str]]) -> None:
             raise ProgramError(f"task {row['id']} depends on unknown task(s): {', '.join(missing)}")
         if row["level"] not in LEVELS:
             raise ProgramError(f"task {row['id']} level must be one of {', '.join(sorted(LEVELS))}, got {row['level']!r}")
+        if not row["max_fixes"].isdigit():
+            raise ProgramError(f"task {row['id']} max_fixes must be a whole number, got {row['max_fixes']!r}")
         if row["base"] != "main" and row["base"] not in parse_deps(row["deps"]):
             raise ProgramError(f"task {row['id']} base must be main or one of its dependencies, got {row['base']!r}")
     graph = {r["id"]: parse_deps(r["deps"]) for r in rows}
@@ -159,6 +164,8 @@ def cmd_init(program: Path, specs: list[str]) -> str:
             "level": "standard",
             "status": "queued",
             "attempts": "0",
+            "fixes": "0",
+            "max_fixes": "1",
             "updated": now(),
         })
     if not rows:
@@ -186,6 +193,13 @@ def cmd_set(program: Path, task_id: str, status: str | None, fields: list[str]) 
             if blocked:
                 raise ProgramError(f"task {task_id} waits on dependencies without a merge or a stack base: {', '.join(blocked)}")
             row["attempts"] = str(int(row["attempts"] or "0") + 1)
+            if row["status"] == "verifying":
+                if int(row["fixes"]) >= int(row["max_fixes"]):
+                    raise ProgramError(
+                        f"task {task_id} spent its fix budget ({row['fixes']} of {row['max_fixes']}); "
+                        "park it, move the findings to findings.md, or have the user raise max_fixes"
+                    )
+                row["fixes"] = str(int(row["fixes"]) + 1)
         if status == "merging":
             unmerged = [d for d in parse_deps(row["deps"]) if by_id(rows)[d]["status"] not in FINAL]
             if unmerged:
@@ -220,7 +234,8 @@ def cmd_show(program: Path) -> str:
     summary = ", ".join(f"{k} {v}" for k, v in sorted(counts.items()))
     lines = [summary]
     for r in rows:
-        extra = " ".join(x for x in (r["pr"], r["head"][:12], r["verdict"], r["note"]) if x)
+        fixes = f"fixes {r['fixes']}/{r['max_fixes']}"
+        extra = " ".join(x for x in (fixes, r["pr"], r["head"][:12], r["verdict"], r["note"]) if x)
         base = "" if r["base"] == "main" else f"\ton[{r['base']}]"
         lines.append(f"{r['id']}\t{r['status']}\t{r['level']}\tdeps[{r['deps']}]{base}\t{extra}")
     done = all(r["status"] in FINAL | {"parked"} for r in rows)

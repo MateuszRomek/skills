@@ -136,6 +136,38 @@ class ProgramTest(unittest.TestCase):
         self.assertEqual(result.returncode, 1)
         self.assertIn("level must be one of", result.stderr)
 
+    def test_fix_rounds_stop_at_the_budget(self) -> None:
+        self.init("1|A")
+        self.advance("1", "building", "verifying", "building", "verifying")
+        result = self.move("1", "building")
+        self.assertEqual(result.returncode, 1)
+        self.assertIn("spent its fix budget (1 of 1)", result.stderr)
+        self.assertIn("fixes 1/1", run("show", self.program).stdout)
+        self.advance("1", "parked")
+
+    def test_raised_budget_allows_another_fix_round(self) -> None:
+        self.init("1|A")
+        self.advance("1", "building", "verifying", "building", "verifying")
+        self.assertEqual(run("set", self.program, "1", "max_fixes=2").returncode, 0)
+        self.advance("1", "building")
+        self.assertIn("fixes 2/2", run("show", self.program).stdout)
+
+    def test_rebase_from_merging_does_not_spend_the_fix_budget(self) -> None:
+        self.init("1|A")
+        self.advance("1", "building", "verifying", "merging", "building", "verifying", "building")
+        self.assertIn("fixes 1/1", run("show", self.program).stdout)
+
+    def test_a_program_written_before_the_fix_budget_loads_with_defaults(self) -> None:
+        self.init("1|A")
+        path = Path(self.program) / "tasks.tsv"
+        old = ["id", "title", "deps", "base", "level", "status", "attempts", "branch", "pr", "head", "verdict", "updated", "note"]
+        rows = [line.split("\t") for line in path.read_text().splitlines()]
+        header = rows[0]
+        path.write_text("".join("\t".join(r[header.index(c)] for c in old) + "\n" for r in rows))
+        self.assertIn("fixes 0/1", run("show", self.program).stdout)
+        self.advance("1", "building")
+        self.assertIn("max_fixes", path.read_text().splitlines()[0])
+
     def test_unknown_field_is_rejected(self) -> None:
         self.init("1|A")
         result = run("set", self.program, "1", "status=merged")
